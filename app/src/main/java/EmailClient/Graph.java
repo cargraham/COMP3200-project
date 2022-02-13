@@ -1,4 +1,4 @@
-package graphtutorial;
+package EmailClient;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -15,12 +15,9 @@ import com.azure.identity.DeviceCodeCredential;
 import com.azure.identity.DeviceCodeCredentialBuilder;
 
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
-import com.microsoft.graph.logger.DefaultLogger;
-import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.options.HeaderOption;
 import com.microsoft.graph.options.Option;
 import com.microsoft.graph.options.QueryOption;
-import org.jetbrains.annotations.NotNull;
 
 public class Graph {
 

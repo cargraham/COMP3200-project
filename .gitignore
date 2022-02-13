@@ -3,4 +3,4 @@
 
 # Ignore Gradle build output directory
 build
-/app/src/main/resources/graphtutorial/oAuth.properties
+/app/src/main/resources/EmailClient/oAuth.properties

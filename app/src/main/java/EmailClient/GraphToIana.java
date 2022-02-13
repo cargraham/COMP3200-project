@@ -1,4 +1,4 @@
-package graphtutorial;
+package EmailClient;
 
 import java.time.ZoneId;
 import java.util.Map;

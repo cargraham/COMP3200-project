@@ -1,4 +1,4 @@
-package graphtutorial;
+package EmailClient;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -15,6 +15,9 @@ import com.microsoft.graph.models.DateTimeTimeZone;
 import com.microsoft.graph.models.Event;
 import com.microsoft.graph.models.Message;
 import com.microsoft.graph.models.User;
+import javafx.application.Application;
+import javafx.stage.Stage;
+
 import java.util.*;
 
 import java.io.IOException;
@@ -23,9 +26,9 @@ import java.io.IOException;
  * Graph Tutorial
  *
  */
-public class App {
+public class App extends Application {
     public static void main(String[] args) {
-        System.out.println("Java Graph Tutorial");
+
         System.out.println();
 
         // Load OAuth settings
@@ -232,5 +235,10 @@ public class App {
         }
 
         System.out.println();
+    }
+
+    @Override
+    public void start(Stage Stage) throws Exception {
+
     }
 }
