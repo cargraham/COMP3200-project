@@ -1,23 +1,23 @@
 package EmailClient;
 
+import com.azure.identity.DeviceCodeCredential;
+import com.azure.identity.DeviceCodeCredentialBuilder;
+import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
+import com.microsoft.graph.models.*;
+import com.microsoft.graph.options.HeaderOption;
+import com.microsoft.graph.options.Option;
+import com.microsoft.graph.options.QueryOption;
+import com.microsoft.graph.requests.*;
+import okhttp3.Request;
+
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
-import com.microsoft.graph.models.*;
-import com.microsoft.graph.requests.*;
-import okhttp3.Request;
-
-import com.azure.identity.DeviceCodeCredential;
-import com.azure.identity.DeviceCodeCredentialBuilder;
-
-import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
-import com.microsoft.graph.options.HeaderOption;
-import com.microsoft.graph.options.Option;
-import com.microsoft.graph.options.QueryOption;
+import java.util.Set;
 
 public class Graph {
 
@@ -169,37 +169,37 @@ public class Graph {
                 .post(newEvent);
     }
 
-    public static List<Message> getMailList(){
-        if (graphClient == null) throw new NullPointerException(
-                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+    public static List<Message> getMailList(int noOfMessages){
+        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         MessageCollectionPage messagePage = graphClient.me().messages()
                 .buildRequest()
-                .top(50)
+                .top(noOfMessages)
                 .get();
 
-        List<Message> allMessages = new ArrayList<Message>();
+        return new ArrayList<Message>(messagePage.getCurrentPage());
+    }
 
-        allMessages.addAll(messagePage.getCurrentPage());
+    public static List<Message> getMailListFromFolder(String folder, int noOfMessages){
+        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
-        /*while (messagePage != null) {
+        MessageCollectionPage messagePage = graphClient.me().mailFolders(folder).messages()
+                .buildRequest()
+                .top(noOfMessages)
+                .get();
 
-            System.out.println("In the while loop");
+        return new ArrayList<>(messagePage.getCurrentPage());
+    }
 
-            allMessages.addAll(messagePage.getCurrentPage());
+    public static List<MailFolder> getMailFolders(){
+        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
-            MessageCollectionRequestBuilder nextPage = messagePage.getNextPage();
+        MailFolderCollectionPage mailFolders = graphClient.me().mailFolders()
+                .buildRequest()
+                .top(100)//TODO this may not be the best way to do it - check if the number of folders is 100 and then request more?
+                .get();
 
-            if (nextPage == null) {
-                break;
-            } else {
-                messagePage = nextPage
-                        .buildRequest()
-                        .get();
-            }
-        }*/
-
-        return allMessages;
+        return new ArrayList<>(mailFolders.getCurrentPage());
     }
 
     /*public static Conversation getMessageConversation(String messageID, String conversationID){

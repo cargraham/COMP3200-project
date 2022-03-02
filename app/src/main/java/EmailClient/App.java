@@ -1,5 +1,13 @@
 package EmailClient;
 
+import com.microsoft.graph.models.DateTimeTimeZone;
+import com.microsoft.graph.models.Event;
+import com.microsoft.graph.models.Message;
+import com.microsoft.graph.models.User;
+import javafx.application.Application;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -9,18 +17,7 @@ import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashSet;
-import java.util.List;
-import com.microsoft.graph.models.DateTimeTimeZone;
-import com.microsoft.graph.models.Event;
-import com.microsoft.graph.models.Message;
-import com.microsoft.graph.models.User;
-import javafx.application.Application;
-import javafx.stage.Stage;
-
 import java.util.*;
-
-import java.io.IOException;
 
 /**
  * Graph Tutorial
@@ -62,9 +59,9 @@ public class App extends Application {
             System.out.println("Please choose one of the following options:");
             System.out.println("0. Exit");
             System.out.println("1. Display access token");
-            System.out.println("2. View this week's calendar");
+            System.out.println("2. EmailClient.View this week's calendar");
             System.out.println("3. Add an event");
-            System.out.println("4. View mail messages");
+            System.out.println("4. EmailClient.View mail messages");
 
             try {
                 choice = input.nextInt();
@@ -221,7 +218,7 @@ public class App extends Application {
 
     private static void listMailMessages(){
 
-        List<Message> messages = Graph.getMailList();
+        List<Message> messages = Graph.getMailList(15);
 
         System.out.println("Mail Messages: ");
 
