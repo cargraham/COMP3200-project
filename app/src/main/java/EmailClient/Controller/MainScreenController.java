@@ -2,28 +2,31 @@ package EmailClient.Controller;
 
 import EmailClient.App;
 import EmailClient.Graph;
-import com.microsoft.graph.models.MailFolder;
-import com.microsoft.graph.models.Message;
-import com.microsoft.graph.models.Recipient;
-import com.microsoft.graph.models.User;
+import com.microsoft.graph.models.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
+import org.controlsfx.control.Notifications;
 
+import java.awt.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.List;
 import java.util.*;
 
 public class MainScreenController {
@@ -53,7 +56,10 @@ public class MainScreenController {
     public TreeView<String> foldersList;
 
     @FXML
-    public Pane webviewPane;
+    public WebView webView;
+
+    @FXML
+    public HBox attachmentsHbox;
 
     public HashMap<HBox, Message> messageMap = new HashMap<>();
     public HashMap<String, String> folderMap = new HashMap<>();
@@ -103,24 +109,59 @@ public class MainScreenController {
         return recipientsString;
     }
 
-    public void selectMessage(Message selectedMessage){
+    public void selectMessage(Message selectedMessage) {
+
         senderText.setText("From: " + selectedMessage.sender.emailAddress.name);
         recipientText.setText("To: " + recipientsString(selectedMessage.toRecipients));
         subjectText.setText("Subject: " + selectedMessage.subject);
 
-        webviewPane.getChildren().clear();
+        webView.getEngine().loadContent("");
+        attachmentsHbox.getChildren().clear();
+
+        if(selectedMessage.hasAttachments){
+
+            for(Attachment attachment : Graph.getMessageAttachmentList(selectedMessage.id)){
+
+                Button attachmentButton = new Button(attachment.name);
+                attachmentsHbox.getChildren().add(attachmentButton);
+
+                if (attachment.oDataType.equals("#microsoft.graph.fileAttachment")){
+                    EventHandler<ActionEvent> event = event1 -> {
+
+                        FileAttachment attachment1 = Graph.getMessageFileAttachment(selectedMessage.id, attachment.id);
+
+                        String home = System.getProperty("user.home");
+
+                        System.out.println("path separator: " + File.separator);
+
+                        File file = new File(home + File.separator + "Downloads" + File.separator + attachment1.name);
+
+                        try(FileOutputStream outputStream = new FileOutputStream(file)){
+                            file.createNewFile();
+                            outputStream.write(attachment1.contentBytes);
+                            if(Desktop.isDesktopSupported()){
+                                Desktop desktop = Desktop.getDesktop();
+                                if(file.exists()){
+                                    desktop.open(file);
+                                }
+                            }
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    };
+
+                    attachmentButton.setOnAction(event);
+                }
+            }
+        }
 
         OffsetDateTime receivedDateTime = selectedMessage.receivedDateTime;
 
         timeStampText.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(receivedDateTime));
-        if(selectedMessage.body.contentType.name() == "TEXT"){
-            bodyText.setText(selectedMessage.body.content);
-        }
-        else{
-            WebView webview = new WebView();
-            webview.getEngine().loadContent(selectedMessage.body.content);
-            webviewPane.getChildren().add(webview);
-        }
+
+        webView.getEngine().loadContent(selectedMessage.body.content);
+
         //TODO figure out how to display this properly
     }
 
@@ -139,9 +180,10 @@ public class MainScreenController {
     }
 
     @FXML
-    public void handleFoldersListClick(){
+    public void handleFoldersListClick() throws ParseException {
 
         listMessages(folderMap.get(foldersList.getSelectionModel().getSelectedItem().getValue()));
+        sendNotification("test notification");
     }
 
     public void loadFolders(){
@@ -205,6 +247,13 @@ public class MainScreenController {
         // Greet the user
         User user = Graph.getUser();
         System.out.println("Welcome " + user.displayName);
+    }
+
+    public void sendNotification(String message){
+        Notifications.create()
+                .title("Notification")
+                .text(message)
+                .show();
     }
 
     @FXML

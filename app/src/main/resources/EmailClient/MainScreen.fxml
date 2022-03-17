@@ -7,7 +7,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
@@ -20,6 +19,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.web.WebView?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EmailClient.Controller.MainScreenController">
    <children>
@@ -42,7 +42,7 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TabPane prefHeight="150.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="120.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Home">
             <content>
@@ -50,12 +50,12 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" layoutY="1.0" spacing="5.0">
                            <children>
-                              <Button mnemonicParsing="false" prefHeight="90.0" prefWidth="70.0" text="New Email" textAlignment="CENTER" wrapText="true">
+                              <Button mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="New Email" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
                               </Button>
-                              <Button mnemonicParsing="false" prefHeight="90.0" prefWidth="70.0" text="Delete" textAlignment="CENTER" wrapText="true">
+                              <Button mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="Delete" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
@@ -89,24 +89,21 @@
                      </children>
                   </VBox>
                   <ListView fx:id="messageListView" onKeyPressed="#handleListViewKeyPress" onMouseClicked="#handleListViewClick" prefHeight="200.0" prefWidth="200.0" />
-                  <ScrollPane fitToWidth="true" prefHeight="200.0" prefWidth="400.0">
-                    <content>
-                        <VBox fx:id="messageHeader" spacing="5.0">
-                           <children>
-                              <Label fx:id="senderText" />
-                              <Label fx:id="recipientText" />
-                              <Label fx:id="subjectText" />
-                              <Label fx:id="timeStampText" />
-                              <Separator prefWidth="200.0" />
-                              <Text fx:id="bodyText" strokeType="OUTSIDE" strokeWidth="0.0" />
-                              <Pane fx:id="webviewPane" VBox.vgrow="ALWAYS" />
-                           </children>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </VBox>
-                    </content>
-                  </ScrollPane>
+                  <VBox fx:id="messageHeader" spacing="5.0">
+                     <children>
+                        <Label fx:id="senderText" />
+                        <Label fx:id="recipientText" />
+                        <Label fx:id="subjectText" />
+                        <Label fx:id="timeStampText" />
+                        <HBox fx:id="attachmentsHbox" prefWidth="200.0" />
+                        <Separator prefWidth="200.0" />
+                        <Text fx:id="bodyText" strokeType="OUTSIDE" strokeWidth="0.0" />
+                        <WebView fx:id="webView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
               </items>
             </SplitPane>
          </children>

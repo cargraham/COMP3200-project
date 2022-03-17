@@ -3,6 +3,8 @@ package EmailClient;
 import com.azure.identity.DeviceCodeCredential;
 import com.azure.identity.DeviceCodeCredentialBuilder;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
+import com.microsoft.graph.logger.DefaultLogger;
+import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.*;
 import com.microsoft.graph.options.HeaderOption;
 import com.microsoft.graph.options.Option;
@@ -32,16 +34,16 @@ public class Graph {
                 .challengeConsumer(challenge -> System.out.println(challenge.getMessage()))
                 .build();
 
-        authProvider = new TokenCredentialAuthProvider(scopes, credential);
+        authProvider = new TokenCredentialAuthProvider(scopes, credential); //not null
 
         // Create default logger to only log errors
-        //DefaultLogger logger = new DefaultLogger();
-        //logger.setLoggingLevel(LoggerLevel.ERROR);
+        DefaultLogger logger = new DefaultLogger();
+        logger.setLoggingLevel(LoggerLevel.ERROR);
 
         // Build a Graph client
         graphClient = GraphServiceClient.builder()
                 .authenticationProvider(authProvider)
-                //.logger(logger)
+                .logger(logger)
                 .buildClient();
     }
 
@@ -200,6 +202,52 @@ public class Graph {
                 .get();
 
         return new ArrayList<>(mailFolders.getCurrentPage());
+    }
+
+    public static List<Attachment> getMessageAttachmentList(String messageID){
+        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        AttachmentCollectionPage attachmentPage = graphClient.me().messages(messageID).attachments()
+                .buildRequest()
+                .get();
+
+        return new ArrayList<>(attachmentPage.getCurrentPage());
+    }
+
+    public static Attachment getMessageAttachment(String messageID, String attachmentID){
+        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        Attachment attachment = graphClient.me().messages(messageID).attachments(attachmentID)
+                .buildRequest()
+                .get();
+
+        return attachment;
+    }
+
+    public static FileAttachment getMessageFileAttachment(String messageID, String attachmentID){
+        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        FileAttachment fileAttachment = (FileAttachment) graphClient.me().messages(messageID).attachments(attachmentID)
+                .buildRequest()
+                .get();
+
+        return fileAttachment;
+    }
+
+    /*public static Subscription getMailChangeNotifications() throws ParseException {
+        Subscription subscription = new Subscription();
+        subscription.changeType = "created";
+        subscription.notificationUrl = "https://webhook.azurewebsites.net/api/send/myNotifyClient";
+        subscription.resource = "me/mailFolders('Inbox')/messages";
+        subscription.expirationDateTime = OffsetDateTimeSerializer.deserialize("2023-11-20T18:23:45.9356913Z");
+        subscription.clientState = "secretClientValue";
+        subscription.latestSupportedTlsVersion = "v1_2";
+
+        Subscription sub = graphClient.subscriptions()
+                .buildRequest()
+                .post(subscription);
+
+        return sub;
     }
 
     /*public static Conversation getMessageConversation(String messageID, String conversationID){

@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,13 +19,14 @@ import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Graph Tutorial
  *
  */
 public class App extends Application {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException, ExecutionException, InterruptedException {
 
         System.out.println();
 
