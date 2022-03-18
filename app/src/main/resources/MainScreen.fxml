@@ -21,7 +21,7 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.web.WebView?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EmailClient.Controller.MainScreenController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
    <children>
       <MenuBar>
         <menus>
@@ -50,7 +50,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" layoutY="1.0" spacing="5.0">
                            <children>
-                              <Button mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="New Email" textAlignment="CENTER" wrapText="true">
+                              <Button fx:id="newEmailButton" mnemonicParsing="false" onAction="#launchNewEmailWindow" prefHeight="80.0" prefWidth="65.0" text="New Email" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>

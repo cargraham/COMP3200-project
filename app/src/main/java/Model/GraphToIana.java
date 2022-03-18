@@ -1,4 +1,4 @@
-package EmailClient;
+package Model;
 
 import java.time.ZoneId;
 import java.util.Map;

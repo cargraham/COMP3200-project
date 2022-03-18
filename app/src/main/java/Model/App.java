@@ -1,4 +1,4 @@
-package EmailClient;
+package Model;
 
 import com.microsoft.graph.models.DateTimeTimeZone;
 import com.microsoft.graph.models.Event;

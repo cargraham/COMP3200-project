@@ -1,4 +1,4 @@
-package EmailClient.Controller;
+package Controller;
 
 public class NewEmailScreenController {
 }

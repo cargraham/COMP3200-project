@@ -1,4 +1,4 @@
-package EmailClient;
+package Model;
 
 import com.azure.identity.DeviceCodeCredential;
 import com.azure.identity.DeviceCodeCredentialBuilder;

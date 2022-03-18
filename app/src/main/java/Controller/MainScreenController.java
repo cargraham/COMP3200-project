@@ -1,21 +1,24 @@
-package EmailClient.Controller;
+package Controller;
 
-import EmailClient.App;
-import EmailClient.Graph;
+import Model.App;
+import Model.Graph;
 import com.microsoft.graph.models.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 
 import java.awt.*;
@@ -60,6 +63,9 @@ public class MainScreenController {
 
     @FXML
     public HBox attachmentsHbox;
+
+    @FXML
+    public Button newEmailButton;
 
     public HashMap<HBox, Message> messageMap = new HashMap<>();
     public HashMap<String, String> folderMap = new HashMap<>();
@@ -230,7 +236,7 @@ public class MainScreenController {
         // Load OAuth settings
         final Properties oAuthProperties = new Properties();
         try {
-            oAuthProperties.load(App.class.getResourceAsStream("oAuth.properties"));
+            oAuthProperties.load(App.class.getResourceAsStream("/oAuth.properties"));
         } catch (IOException e) {
             System.out.println("Unable to read OAuth configuration. Make sure you have a properly formatted oAuth.properties file. See README for details.");
             return;
@@ -269,5 +275,16 @@ public class MainScreenController {
 
             selectMessage(messageMap.get(messageListView.getSelectionModel().getSelectedItem()));
         }
+    }
+
+    @FXML
+    public void launchNewEmailWindow() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/NewEmailScreen.fxml"));
+        Stage stage = new Stage();
+        Scene scene = new Scene(fxmlLoader.load(), 500, 300);
+        stage.setTitle("New Email");
+        stage.setScene(scene);
+        stage.show();
     }
 }

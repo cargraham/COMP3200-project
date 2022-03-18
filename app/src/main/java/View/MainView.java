@@ -1,4 +1,4 @@
-package EmailClient;
+package View;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +12,7 @@ public class MainView extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MainScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/MainScreen.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 500, 300);
         //scene.getStylesheets().add("stylesheet.css");
         stage.setTitle("Email Client");
