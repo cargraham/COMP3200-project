@@ -10,9 +10,11 @@ import com.microsoft.graph.options.HeaderOption;
 import com.microsoft.graph.options.Option;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.*;
+import com.microsoft.graph.serializer.OffsetDateTimeSerializer;
 import okhttp3.Request;
 
 import java.net.URL;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,10 +33,10 @@ public class Graph {
         final DeviceCodeCredential credential = new DeviceCodeCredentialBuilder()
                 .clientId(applicationId)
                 .tenantId("common")
-                .challengeConsumer(challenge -> System.out.println(challenge.getMessage()))
+                .challengeConsumer(challenge -> System.out.println(challenge.getMessage())) //TODO display this in fx dialog
                 .build();
 
-        authProvider = new TokenCredentialAuthProvider(scopes, credential); //not null
+        authProvider = new TokenCredentialAuthProvider(scopes, credential);
 
         // Create default logger to only log errors
         DefaultLogger logger = new DefaultLogger();
@@ -71,7 +73,7 @@ public class Graph {
         return me;
     }
 
-    public static List<Event> getCalendarView(
+    public static List<Event> getCalendarView( //TODO not used
             ZonedDateTime viewStart, ZonedDateTime viewEnd, String timeZone) {
         if (graphClient == null) throw new NullPointerException(
                 "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
@@ -120,7 +122,7 @@ public class Graph {
         return allEvents;
     }
 
-    public static void createEvent(
+    public static void createEvent( //TODO not used
             String timeZone,
             String subject,
             LocalDateTime start,
@@ -172,6 +174,7 @@ public class Graph {
     }
 
     public static List<Message> getMailList(int noOfMessages){
+
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         MessageCollectionPage messagePage = graphClient.me().messages()
@@ -183,6 +186,7 @@ public class Graph {
     }
 
     public static List<Message> getMailListFromFolder(String folder, int noOfMessages){
+
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         MessageCollectionPage messagePage = graphClient.me().mailFolders(folder).messages()
@@ -194,6 +198,7 @@ public class Graph {
     }
 
     public static List<MailFolder> getMailFolders(){
+
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         MailFolderCollectionPage mailFolders = graphClient.me().mailFolders()
@@ -205,6 +210,7 @@ public class Graph {
     }
 
     public static List<Attachment> getMessageAttachmentList(String messageID){
+
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         AttachmentCollectionPage attachmentPage = graphClient.me().messages(messageID).attachments()
@@ -215,6 +221,7 @@ public class Graph {
     }
 
     public static Attachment getMessageAttachment(String messageID, String attachmentID){
+
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         Attachment attachment = graphClient.me().messages(messageID).attachments(attachmentID)
@@ -225,6 +232,7 @@ public class Graph {
     }
 
     public static FileAttachment getMessageFileAttachment(String messageID, String attachmentID){
+
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
         FileAttachment fileAttachment = (FileAttachment) graphClient.me().messages(messageID).attachments(attachmentID)
@@ -234,28 +242,219 @@ public class Graph {
         return fileAttachment;
     }
 
-    /*public static Subscription getMailChangeNotifications() throws ParseException {
-        Subscription subscription = new Subscription();
-        subscription.changeType = "created";
-        subscription.notificationUrl = "https://webhook.azurewebsites.net/api/send/myNotifyClient";
-        subscription.resource = "me/mailFolders('Inbox')/messages";
-        subscription.expirationDateTime = OffsetDateTimeSerializer.deserialize("2023-11-20T18:23:45.9356913Z");
-        subscription.clientState = "secretClientValue";
-        subscription.latestSupportedTlsVersion = "v1_2";
+    public static Message createMessage(String subject, String bodyText, List<String> recipients, List<String> ccRecipients){
 
-        Subscription sub = graphClient.subscriptions()
-                .buildRequest()
-                .post(subscription);
+        Message message = new Message();
+        message.subject = subject;
+        Recipient sender = new Recipient();
+        EmailAddress userEmailAddress = new EmailAddress();
+        userEmailAddress.address = getUser().userPrincipalName;
+        sender.emailAddress = userEmailAddress;
+        message.sender = sender;
 
-        return sub;
+        ItemBody body = new ItemBody();
+        body.contentType = BodyType.TEXT;
+        body.content = bodyText;
+        message.body = body;
+
+        LinkedList<Recipient> toRecipientsList = new LinkedList<>();
+        for(String recipient : recipients){
+            Recipient toRecipient = new Recipient();
+            EmailAddress emailAddress = new EmailAddress();
+            emailAddress.address = recipient;
+            toRecipient.emailAddress = emailAddress;
+            toRecipientsList.add(toRecipient);
+        }
+        message.toRecipients = toRecipientsList;
+
+        LinkedList<Recipient> ccRecipientList = new LinkedList<>();
+        for(String recipient : ccRecipients){
+            Recipient ccRecipient = new Recipient();
+            EmailAddress emailAddress = new EmailAddress();
+            emailAddress.address = recipient;
+            ccRecipient.emailAddress = emailAddress;
+            ccRecipientList.add(ccRecipient);
+        }
+        message.ccRecipients = ccRecipientList;
+
+        return message;
     }
 
-    /*public static Conversation getMessageConversation(String messageID, String conversationID){
+    public static void saveDraft(Message message){
+
         if (graphClient == null) throw new NullPointerException(
                 "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
-        Conversation conversation = graphClient.groups("4d81ce71-486c-41e9-afc5-e41bf2d0722a").conversations("AAQkAGRhZmRhMWM3LTYwZTktNDZmYy1hNWU1LThhZWU4NzI2YTEyZgAQABKPPJ682apIiV1UFlj7XxY=")
+        graphClient.me().messages()
                 .buildRequest()
-                .get();
-    }*/
+                .post(message);
+    }
+
+    public static void sendMessage(Message message){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me()
+                .sendMail(UserSendMailParameterSet
+                        .newBuilder()
+                        .withMessage(message)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static void deleteMessage(String messageID, String folderName){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        if(folderName != "Deleted Items"){
+
+            String destinationId = "deleteditems";
+
+            graphClient.me().messages(messageID)
+                    .move(MessageMoveParameterSet
+                            .newBuilder()
+                            .withDestinationId(destinationId)
+                            .build())
+                    .buildRequest()
+                    .post();
+        }
+        else{
+
+            graphClient.me().messages(messageID)
+                    .buildRequest()
+                    .delete();
+        }
+    }
+
+    public static void replyToMessage(String messageID, Message reply){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().messages(messageID)
+                .reply(MessageReplyParameterSet
+                        .newBuilder()
+                        .withMessage(reply)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static void replyAllToMessage(String messageID, Message reply){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().messages(messageID)
+                .replyAll(MessageReplyAllParameterSet
+                        .newBuilder()
+                        .withMessage(reply)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static void forwardMessage(String messageID, List<String> toRecipients, Message message) {
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().messages(messageID)
+                .forward(MessageForwardParameterSet
+                        .newBuilder()
+                        .withMessage(message)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static Message createForwardMessage(String subject, String bodyText, List<String> recipients, List<String> ccRecipients, Message messageToForward){
+
+        Message message = new Message();
+        message.subject = subject;
+        Recipient sender = new Recipient();
+        EmailAddress userEmailAddress = new EmailAddress();
+        userEmailAddress.address = getUser().userPrincipalName;
+        sender.emailAddress = userEmailAddress;
+        message.sender = sender;
+
+        ItemBody body = new ItemBody();
+        body.contentType = messageToForward.body.contentType;
+
+        //if(body.contentType == BodyType.HTML) {
+            body.content = htmlParser(bodyText) + messageToForward.body.content;
+        /*}
+        else{
+            body.content = bodyText + messageToForward.body.content;
+        }*/
+
+        message.body = body;
+
+        LinkedList<Recipient> toRecipientsList = new LinkedList<>();
+        for(String recipient : recipients){
+            Recipient toRecipient = new Recipient();
+            EmailAddress emailAddress = new EmailAddress();
+            emailAddress.address = recipient;
+            toRecipient.emailAddress = emailAddress;
+            toRecipientsList.add(toRecipient);
+        }
+        message.toRecipients = toRecipientsList;
+
+        LinkedList<Recipient> ccRecipientList = new LinkedList<>();
+        for(String recipient : ccRecipients){
+            Recipient ccRecipient = new Recipient();
+            EmailAddress emailAddress = new EmailAddress();
+            emailAddress.address = recipient;
+            ccRecipient.emailAddress = emailAddress;
+            ccRecipientList.add(ccRecipient);
+        }
+        message.ccRecipients = ccRecipientList;
+
+        return message;
+    }
+
+    public static String htmlParser(String body){
+
+        String newBody = body.replaceAll("(\r\n|\r|\n)", "<br>");
+
+        System.out.println(newBody);
+
+        return "<html>" + newBody + "<br><hr><br></html>";
+    }
+
+    public static void readMessage(Message message){
+
+        Message newMessage = new Message();
+        newMessage.subject = message.subject;
+        ItemBody body = new ItemBody();
+        body.contentType = message.body.contentType;
+        body.content = message.body.content;
+        newMessage.body = body;
+        newMessage.isRead = true;
+
+        graphClient.me()
+                .messages(message.id)
+                .buildRequest()
+                .patch(newMessage);
+
+    }
+
+    public static void createSubscription() throws ParseException {
+
+        GraphServiceClient graphClient = GraphServiceClient.builder().authenticationProvider( authProvider ).buildClient();
+
+        Subscription subscription = new Subscription();
+        subscription.changeType = "created";
+        subscription.notificationUrl = "https://webhook.site/a9639b99-4933-4367-bab8-bca509f5b11d";
+        subscription.resource = "me/mailFolders('Inbox')/messages";
+        subscription.expirationDateTime = OffsetDateTimeSerializer.deserialize("2022-04-05T18:23:45.9356913Z");
+        subscription.clientState = "secretClientValue";
+
+        graphClient.subscriptions()
+                .buildRequest()
+                .post(subscription);
+    }
 }

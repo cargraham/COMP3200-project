@@ -1,6 +1,5 @@
 package Controller;
 
-import Model.App;
 import Model.Graph;
 import com.microsoft.graph.models.*;
 import javafx.event.ActionEvent;
@@ -8,6 +7,9 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -35,10 +37,10 @@ import java.util.*;
 public class MainScreenController {
 
     @FXML
-    public ListView<HBox> messageListView;
+    public ListView<VBox> messageListView;
 
     @FXML
-    public VBox messageHeader;
+    public VBox messageHeader; //TODO don't need?
 
     @FXML
     public Label senderText;
@@ -67,7 +69,19 @@ public class MainScreenController {
     @FXML
     public Button newEmailButton;
 
-    public HashMap<HBox, Message> messageMap = new HashMap<>();
+    @FXML
+    public Button deleteButton;
+
+    @FXML
+    public Button replyButton;
+
+    @FXML
+    public Button replyAllButton;
+
+    @FXML
+    public Button forwardButton;
+
+    public HashMap<VBox, Message> messageMap = new HashMap<>(); //TODO could be private?
     public HashMap<String, String> folderMap = new HashMap<>();
 
     public void listMessages(String folderName){
@@ -79,27 +93,44 @@ public class MainScreenController {
 
         for (Message message: messageList) {
 
-            Label sender = new Label(message.sender.emailAddress.name);
+            Label sender = new Label();
+
+            if(message.sender == null){
+                sender.setText("");
+            }
+            else{
+                sender = new Label(message.sender.emailAddress.name);
+            }
+
             Label subject = new Label(message.subject);
             Label bodyPreview = new Label(message.bodyPreview.split(System.lineSeparator())[0]);
             Label timestamp = new Label(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(message.receivedDateTime));
-            //TODO add timestamp
 
-            VBox vBox = new VBox(5, sender, subject, bodyPreview);
+            HBox hBox = new HBox(timestamp);
+            hBox.setMaxWidth(300);
+            hBox.setAlignment(Pos.TOP_RIGHT);
+
+            VBox vBox = new VBox(5, hBox, sender, subject, bodyPreview);
             vBox.setPadding(new Insets(10, 5, 10 , 5));
             vBox.setMaxWidth(300);
             vBox.setMinWidth(300);
+
+            if(Boolean.FALSE.equals(message.isRead)){
+
+                for(Node child : vBox.getChildren()){
+                    child.setStyle("-fx-font-weight: bold;");
+                }
+            }
+
             //TODO add listener to split pane?
 
-            HBox hBox = new HBox(vBox, timestamp);
+            messageMap.put(vBox, message);
 
-            messageMap.put(hBox, message);
-
-            messageListView.getItems().add(hBox);
+            messageListView.getItems().add(vBox);
         }
     }
 
-    private String recipientsString(List<Recipient> recipients){
+    private String recipientsString(List<Recipient> recipients){ //TODO replace with StringJoiner
 
         String recipientsString = "";
 
@@ -108,7 +139,7 @@ public class MainScreenController {
                 recipientsString += recipient.emailAddress.name;
             }
             else{
-                recipientsString += ", " + recipient.emailAddress.name;
+                recipientsString += "; " + recipient.emailAddress.name;
             }
         }
 
@@ -117,9 +148,26 @@ public class MainScreenController {
 
     public void selectMessage(Message selectedMessage) {
 
-        senderText.setText("From: " + selectedMessage.sender.emailAddress.name);
-        recipientText.setText("To: " + recipientsString(selectedMessage.toRecipients));
-        subjectText.setText("Subject: " + selectedMessage.subject);
+        if(selectedMessage.sender != null){
+            senderText.setText("From: " + selectedMessage.sender.emailAddress.name);
+        }
+        else{
+            senderText.setText("From: ");
+        }
+
+        if(selectedMessage.toRecipients != null){
+            recipientText.setText("To: " + recipientsString(selectedMessage.toRecipients));
+        }
+        else {
+            recipientText.setText("To: ");
+        }
+
+        if(selectedMessage.subject != null){
+            subjectText.setText("Subject: " + selectedMessage.subject);
+        }
+        else{
+            subjectText.setText("Subject: ");
+        }
 
         webView.getEngine().loadContent("");
         attachmentsHbox.getChildren().clear();
@@ -174,7 +222,17 @@ public class MainScreenController {
     @FXML
     public void handleListViewClick(MouseEvent event){
 
-        selectMessage(messageMap.get(messageListView.getSelectionModel().getSelectedItem()));
+        VBox vbox = messageListView.getSelectionModel().getSelectedItem();
+        Message selectedMessage = messageMap.get(vbox);
+
+        for(Node child : vbox.getChildren()){
+            child.setStyle("-fx-font-weight: regular;");
+        }
+
+        Graph.readMessage(selectedMessage);
+
+        selectMessage(selectedMessage);
+
     }
 
     @FXML
@@ -189,7 +247,6 @@ public class MainScreenController {
     public void handleFoldersListClick() throws ParseException {
 
         listMessages(folderMap.get(foldersList.getSelectionModel().getSelectedItem().getValue()));
-        sendNotification("test notification");
     }
 
     public void loadFolders(){
@@ -236,7 +293,7 @@ public class MainScreenController {
         // Load OAuth settings
         final Properties oAuthProperties = new Properties();
         try {
-            oAuthProperties.load(App.class.getResourceAsStream("/oAuth.properties"));
+            oAuthProperties.load(getClass().getResourceAsStream("/oAuth.properties"));
         } catch (IOException e) {
             System.out.println("Unable to read OAuth configuration. Make sure you have a properly formatted oAuth.properties file. See README for details.");
             return;
@@ -248,25 +305,26 @@ public class MainScreenController {
 
         // Initialize Graph with auth settings
         Graph.initializeGraphAuth(appId, appScopes);
-        final String accessToken = Graph.getUserAccessToken();
+        //final String accessToken = Graph.getUserAccessToken();
 
         // Greet the user
         User user = Graph.getUser();
         System.out.println("Welcome " + user.displayName);
     }
 
-    public void sendNotification(String message){
+    public void sendNotification(String title, String message){
         Notifications.create()
-                .title("Notification")
+                .title(title)
                 .text(message)
                 .show();
     }
 
     @FXML
-    public void initialize(){
+    public void initialize() throws ParseException {
         logIn();
         loadFolders();
         listMessages(folderMap.get("Inbox"));
+        Graph.createSubscription();
 
         //first message is selected on load - TODO should probably have its own method
         if(!messageListView.getItems().isEmpty()){
@@ -282,8 +340,80 @@ public class MainScreenController {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/NewEmailScreen.fxml"));
         Stage stage = new Stage();
-        Scene scene = new Scene(fxmlLoader.load(), 500, 300);
+        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
         stage.setTitle("New Email");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
+    public void deleteMessage(){
+
+        VBox messageVbox = messageListView.getSelectionModel().getSelectedItem();
+        Message selectedMessage = messageMap.get(messageVbox);
+        String currentFolderName = foldersList.getSelectionModel().getSelectedItem().getValue();
+
+        Graph.deleteMessage(selectedMessage.id, currentFolderName);
+
+        messageListView.getItems().remove(messageVbox);
+        messageMap.remove(selectedMessage);
+    }
+
+    @FXML
+    public void replyToMessage() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ReplyEmailScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ReplyEmailScreenController replyEmailScreenController = fxmlLoader.getController();
+        Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
+        Recipient recipient = selectedMessage.sender;
+        String subject = selectedMessage.subject;
+
+        replyEmailScreenController.initialiseReply(recipient, subject, selectedMessage.id);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        stage.setTitle("Reply to Email");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
+    public void replyAllToMessage() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ReplyEmailScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ReplyEmailScreenController replyEmailScreenController = fxmlLoader.getController();
+        Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
+        ArrayList<Recipient> recipients = (ArrayList<Recipient>) selectedMessage.toRecipients;
+        recipients.add(selectedMessage.sender);
+        String subject = selectedMessage.subject;
+
+        replyEmailScreenController.initialiseReply(recipients, subject, selectedMessage.id);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        stage.setTitle("Reply All to Email");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
+    public void forwardMessage() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ForwardEmailScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ForwardEmailScreenController forwardEmailScreenController = fxmlLoader.getController();
+        Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
+
+        forwardEmailScreenController.initialiseMessage(selectedMessage);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        stage.setTitle("Forward Email");
         stage.setScene(scene);
         stage.show();
     }

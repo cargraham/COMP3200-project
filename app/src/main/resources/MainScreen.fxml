@@ -55,7 +55,22 @@
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
                               </Button>
-                              <Button mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="Delete" textAlignment="CENTER" wrapText="true">
+                              <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteMessage" prefHeight="80.0" prefWidth="65.0" text="Delete" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="replyButton" mnemonicParsing="false" onAction="#replyToMessage" prefHeight="80.0" prefWidth="65.0" text="Reply" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="replyAllButton" mnemonicParsing="false" onAction="#replyAllToMessage" prefHeight="80.0" prefWidth="65.0" text="Reply All" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="forwardButton" mnemonicParsing="false" onAction="#forwardMessage" prefHeight="80.0" prefWidth="65.0" text="Forward" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
@@ -81,14 +96,10 @@
       </TabPane>
       <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <children>
-            <SplitPane dividerPositions="0.29797979797979796, 0.5" prefHeight="160.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+            <SplitPane dividerPositions="0.29797979797979796, 0.5" HBox.hgrow="ALWAYS">
               <items>
-                  <VBox>
-                     <children>
-                        <TreeView fx:id="foldersList" onMouseClicked="#handleFoldersListClick" VBox.vgrow="ALWAYS" />
-                     </children>
-                  </VBox>
-                  <ListView fx:id="messageListView" onKeyPressed="#handleListViewKeyPress" onMouseClicked="#handleListViewClick" prefHeight="200.0" prefWidth="200.0" />
+                  <TreeView fx:id="foldersList" maxWidth="300.0" minWidth="200.0" onMouseClicked="#handleFoldersListClick" prefWidth="200.0" />
+                  <ListView fx:id="messageListView" maxWidth="340.0" onKeyPressed="#handleListViewKeyPress" onMouseClicked="#handleListViewClick" prefWidth="340.0" />
                   <VBox fx:id="messageHeader" spacing="5.0">
                      <children>
                         <Label fx:id="senderText" />

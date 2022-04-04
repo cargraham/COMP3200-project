@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.NewEmailScreenController">
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ReplyEmailScreenController">
    <children>
       <MenuBar>
         <menus>
@@ -36,7 +36,7 @@
           </Menu>
         </menus>
       </MenuBar>
-      <BorderPane>
+      <BorderPane minHeight="140.0">
          <right>
             <HBox spacing="10.0" BorderPane.alignment="CENTER">
                <BorderPane.margin>
@@ -69,15 +69,15 @@
                      <GridPane.margin>
                         <Insets left="5.0" />
                      </GridPane.margin></TextField>
-                  <TextField fx:id="subjectTextField" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                     <GridPane.margin>
-                        <Insets left="5.0" />
-                     </GridPane.margin></TextField>
                   <TextField fx:id="ccTextField" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <GridPane.margin>
                         <Insets left="5.0" />
                      </GridPane.margin>
                   </TextField>
+                  <TextField fx:id="subjectTextField" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <GridPane.margin>
+                        <Insets left="5.0" />
+                     </GridPane.margin></TextField>
                   <Label text="From:" />
                   <Label text="To:" GridPane.rowIndex="1" />
                   <Label text="Subject:" GridPane.rowIndex="3" />
