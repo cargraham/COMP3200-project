@@ -2,6 +2,7 @@ package Controller;
 
 import Model.Graph;
 import com.microsoft.graph.models.*;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainScreenController {
 
@@ -81,8 +83,16 @@ public class MainScreenController {
     @FXML
     public Button forwardButton;
 
-    public HashMap<VBox, Message> messageMap = new HashMap<>(); //TODO could be private?
+    @FXML
+    public Button syncFrequencyButton;
+
+    @FXML
+    public Button changeModeButton;
+
+    public HashMap<VBox, Message> messageMap = new HashMap<>(); //TODO all could be private?
     public HashMap<String, String> folderMap = new HashMap<>();
+    public final int notificationLength = 30;
+    public long syncFrequency = 30000;
 
     public void listMessages(String folderName){
 
@@ -223,16 +233,17 @@ public class MainScreenController {
     public void handleListViewClick(MouseEvent event){
 
         VBox vbox = messageListView.getSelectionModel().getSelectedItem();
-        Message selectedMessage = messageMap.get(vbox);
 
-        for(Node child : vbox.getChildren()){
-            child.setStyle("-fx-font-weight: regular;");
+        if(vbox != null){
+            Message selectedMessage = messageMap.get(vbox);
+
+            for(Node child : vbox.getChildren()){
+                child.setStyle("-fx-font-weight: normal;");
+            }
+
+            Graph.readMessage(selectedMessage);
+            selectMessage(selectedMessage);
         }
-
-        Graph.readMessage(selectedMessage);
-
-        selectMessage(selectedMessage);
-
     }
 
     @FXML
@@ -247,6 +258,7 @@ public class MainScreenController {
     public void handleFoldersListClick() throws ParseException {
 
         listMessages(folderMap.get(foldersList.getSelectionModel().getSelectedItem().getValue()));
+        //TODO create local variable to keep track of current folder - lowercase and remove spaces
     }
 
     public void loadFolders(){
@@ -312,10 +324,23 @@ public class MainScreenController {
         System.out.println("Welcome " + user.displayName);
     }
 
-    public void sendNotification(String title, String message){
+    public void sendNotification(String sender, String subject, String bodyPreview){
+
+        if(sender.length() > notificationLength){
+            sender = sender.substring(0, notificationLength) + "...";
+        }
+
+        if(subject.length() > notificationLength){
+            subject = subject.substring(0, notificationLength) + "...";
+        }
+
+        if(bodyPreview.length() > notificationLength){
+            bodyPreview = bodyPreview.replaceAll("(\r\n|\r|\n)", "").substring(0, notificationLength) + "...";
+        }
+
         Notifications.create()
-                .title(title)
-                .text(message)
+                .title(sender)
+                .text(subject + System.lineSeparator() + bodyPreview)
                 .show();
     }
 
@@ -324,7 +349,8 @@ public class MainScreenController {
         logIn();
         loadFolders();
         listMessages(folderMap.get("Inbox"));
-        Graph.createSubscription();
+        //Graph.createSubscription();
+        syncTimer();
 
         //first message is selected on load - TODO should probably have its own method
         if(!messageListView.getItems().isEmpty()){
@@ -416,5 +442,47 @@ public class MainScreenController {
         stage.setTitle("Forward Email");
         stage.setScene(scene);
         stage.show();
+    }
+
+    public void syncTimer(){ //take current folder?
+
+        Timer timer = new Timer();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                Platform.runLater(() -> { //TODO add try catch
+
+                    try{
+
+                        List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size());
+                        List<Message> difference = new ArrayList<>(messageMap.values());
+
+                        Map<String, Message> messageIDMap = messages.stream().collect(Collectors.toMap(message -> message.id, message -> message));
+                        Map<String, Message> differenceIDMap = difference.stream().collect(Collectors.toMap(message -> message.id, message -> message));
+
+                        for(String id : differenceIDMap.keySet()){
+                            messageIDMap.remove(id);
+                        }
+
+                        if (messageIDMap.size() > 0){
+                            for(Message message : messageIDMap.values()){
+
+                                String sender = message.sender.emailAddress.name;
+                                String subject = message.subject;
+                                String bodyPreview = message.bodyPreview;
+                                sendNotification(sender, subject, bodyPreview);
+                            }
+
+                            listMessages("inbox"); //TODO work notifications in
+                        }
+
+                    } catch (Exception e){
+                        System.out.println(e);
+                    }
+                });
+            }
+        }, 0, syncFrequency);
     }
 }

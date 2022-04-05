@@ -87,9 +87,31 @@
                   </AnchorPane>
             </content>
           </Tab>
-          <Tab text="View">
+          <Tab text="Settings">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                           <children>
+                              <Button fx:id="syncFrequencyButton" mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="Change Sync Frequency" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="changeModeButton" mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="Change Mode" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                           </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </HBox>
+                     </children></AnchorPane>
             </content>
           </Tab>
         </tabs>
