@@ -93,7 +93,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="5.0">
                            <children>
-                              <Button fx:id="syncFrequencyButton" mnemonicParsing="false" prefHeight="80.0" prefWidth="65.0" text="Change Sync Frequency" textAlignment="CENTER" wrapText="true">
+                              <Button fx:id="syncFrequencyButton" mnemonicParsing="false" onAction="#showChangeSyncFrequency" prefHeight="80.0" prefWidth="65.0" text="Change Sync Frequency" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>

@@ -92,7 +92,16 @@ public class MainScreenController {
     public HashMap<VBox, Message> messageMap = new HashMap<>(); //TODO all could be private?
     public HashMap<String, String> folderMap = new HashMap<>();
     public final int notificationLength = 30;
-    public long syncFrequency = 30000;
+    public long syncFrequency = 60000;
+    public Timer timer = new Timer();
+
+    public long getSyncFrequency() {
+        return syncFrequency;
+    }
+
+    public void setSyncFrequency(long syncFrequency) {
+        this.syncFrequency = syncFrequency;
+    }
 
     public void listMessages(String folderName){
 
@@ -444,9 +453,32 @@ public class MainScreenController {
         stage.show();
     }
 
-    public void syncTimer(){ //take current folder?
+    @FXML
+    public void showChangeSyncFrequency() throws IOException {
 
-        Timer timer = new Timer();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ChangeSyncFrequencyScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ChangeSyncFrequencyScreenController changeSyncFrequencyScreenController = fxmlLoader.getController();
+        changeSyncFrequencyScreenController.setMainScreenController(this);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 300, 200);
+        stage.setTitle("Change Sync Frequency");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public void changeSyncFrequency(long syncFrequency){
+        this.syncFrequency = syncFrequency;
+    }
+
+    public void cancelTimer(){
+        timer.cancel();
+        timer = new Timer();
+    }
+
+    public void syncTimer(){ //take current folder?
 
         timer.schedule(new TimerTask() {
             @Override
@@ -455,6 +487,8 @@ public class MainScreenController {
                 Platform.runLater(() -> { //TODO add try catch
 
                     try{
+
+                        System.out.println(syncFrequency);
 
                         List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size());
                         List<Message> difference = new ArrayList<>(messageMap.values());
@@ -475,7 +509,7 @@ public class MainScreenController {
                                 sendNotification(sender, subject, bodyPreview);
                             }
 
-                            listMessages("inbox"); //TODO work notifications in
+                            listMessages("inbox");
                         }
 
                     } catch (Exception e){
