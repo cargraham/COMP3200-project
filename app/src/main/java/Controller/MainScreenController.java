@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Graph;
+import Model.Mode;
 import com.microsoft.graph.models.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -91,9 +92,32 @@ public class MainScreenController {
 
     public HashMap<VBox, Message> messageMap = new HashMap<>(); //TODO all could be private?
     public HashMap<String, String> folderMap = new HashMap<>();
-    public final int notificationLength = 30;
-    public long syncFrequency = 60000;
     public Timer timer = new Timer();
+
+    private Mode mode = Mode.NORMAL;
+    private long syncFrequency = 60000;
+    private int notificationCount = 0;
+    private int notificationThreshold = 5;
+    private final int notificationLength = 40;
+
+    /*
+    * GETTERS AND SETTERS
+    * */
+    public int getNotificationThreshold() {
+        return notificationThreshold;
+    }
+
+    public void setNotificationThreshold(int notificationThreshold) {
+        this.notificationThreshold = notificationThreshold;
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
 
     public long getSyncFrequency() {
         return syncFrequency;
@@ -373,7 +397,7 @@ public class MainScreenController {
     @FXML
     public void launchNewEmailWindow() throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/NewEmailScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/NewEmailScreen.fxml"));
         Stage stage = new Stage();
         Scene scene = new Scene(fxmlLoader.load(), 600, 400);
         stage.setTitle("New Email");
@@ -391,13 +415,13 @@ public class MainScreenController {
         Graph.deleteMessage(selectedMessage.id, currentFolderName);
 
         messageListView.getItems().remove(messageVbox);
-        messageMap.remove(selectedMessage);
+        messageMap.remove(messageVbox);
     }
 
     @FXML
     public void replyToMessage() throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ReplyEmailScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ReplyEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
 
         ReplyEmailScreenController replyEmailScreenController = fxmlLoader.getController();
@@ -417,7 +441,7 @@ public class MainScreenController {
     @FXML
     public void replyAllToMessage() throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ReplyEmailScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ReplyEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
 
         ReplyEmailScreenController replyEmailScreenController = fxmlLoader.getController();
@@ -438,7 +462,7 @@ public class MainScreenController {
     @FXML
     public void forwardMessage() throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ForwardEmailScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ForwardEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
 
         ForwardEmailScreenController forwardEmailScreenController = fxmlLoader.getController();
@@ -456,7 +480,7 @@ public class MainScreenController {
     @FXML
     public void showChangeSyncFrequency() throws IOException {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ChangeSyncFrequencyScreen.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeSyncFrequencyScreen.fxml"));
         Parent root = fxmlLoader.load();
 
         ChangeSyncFrequencyScreenController changeSyncFrequencyScreenController = fxmlLoader.getController();
@@ -469,8 +493,19 @@ public class MainScreenController {
         stage.show();
     }
 
-    public void changeSyncFrequency(long syncFrequency){
-        this.syncFrequency = syncFrequency;
+    @FXML
+    public void changeMode() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeModeScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ChangeModeScreenController changeModeScreenController = fxmlLoader.getController();
+        changeModeScreenController.setMainScreenController(this);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        stage.setTitle("Change Mode");
+        stage.setScene(scene);
+        stage.show();
     }
 
     public void cancelTimer(){
@@ -484,30 +519,62 @@ public class MainScreenController {
             @Override
             public void run() {
 
-                Platform.runLater(() -> { //TODO add try catch
+                Platform.runLater(() -> {
 
-                    try{
+                    try{ //TODO if current folder is inbox
 
-                        System.out.println(syncFrequency);
-
-                        List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size());
-                        List<Message> difference = new ArrayList<>(messageMap.values());
+                        List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size()); //from graph
+                        List<Message> difference = new ArrayList<>(messageMap.values()); //from app
 
                         Map<String, Message> messageIDMap = messages.stream().collect(Collectors.toMap(message -> message.id, message -> message));
                         Map<String, Message> differenceIDMap = difference.stream().collect(Collectors.toMap(message -> message.id, message -> message));
+
+                        List<String> messageSubjects = messages.stream().map(m -> m.subject).collect(Collectors.toList());
+                        List<String> differencesSubjects = difference.stream().map(m -> m.subject).collect(Collectors.toList());
+
+                        System.out.println(messageSubjects);
+                        System.out.println(differencesSubjects);
 
                         for(String id : differenceIDMap.keySet()){
                             messageIDMap.remove(id);
                         }
 
-                        if (messageIDMap.size() > 0){
-                            for(Message message : messageIDMap.values()){
+                        for(Message message : messageIDMap.values()){
+                            System.out.println(message.subject);
+                        }
 
-                                String sender = message.sender.emailAddress.name;
-                                String subject = message.subject;
-                                String bodyPreview = message.bodyPreview;
-                                sendNotification(sender, subject, bodyPreview);
+                        System.out.println("MESSAGE ID SIZE: " + messageIDMap.size());
+
+                        if (messageIDMap.size() > 0){
+                            if(mode == Mode.NORMAL){
+                                for(Message message : messageIDMap.values()){
+
+                                    String sender = message.sender.emailAddress.name;
+                                    String subject = message.subject;
+                                    String bodyPreview = message.bodyPreview;
+                                    sendNotification(sender, subject, bodyPreview);
+                                }
                             }
+                            /*else if(mode == Mode.DISTURB){
+
+                            }*/
+                            else if(mode == Mode.CONCENTRATED){
+
+                                notificationCount += messageIDMap.size();
+
+                                System.out.println("IN CONCENTRATED MODE, NOTIFICATION THRESHOLD: " + notificationThreshold);
+                                System.out.println("NOTIFICATION COUNT: " + notificationCount);
+
+
+                                if(notificationCount >= notificationThreshold){
+                                    sendNotification("Concentrated Mode", "You have " + notificationCount + " new emails in your Inbox", "");
+                                    notificationCount = 0;
+                                }
+                            }
+                            else if(mode == Mode.HOLIDAY){
+
+                            }
+
 
                             listMessages("inbox");
                         }

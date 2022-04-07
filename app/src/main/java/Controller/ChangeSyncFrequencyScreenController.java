@@ -41,22 +41,12 @@ public class ChangeSyncFrequencyScreenController {
 
         String minutes = comboBox.getValue();
 
-        switch (minutes){
-            case "1 Minute":
-                syncFrequency = 60000;
-                break;
-            case "5 Minutes":
-                syncFrequency = 300000;
-                break;
-            case "10 Minutes":
-                syncFrequency = 600000;
-                break;
-            case "30 Minutes":
-                syncFrequency = 1800000;
-                break;
-            case "60 Minutes":
-                syncFrequency = 3600000;
-                break;
+        switch (minutes) {
+            case "1 Minute" -> syncFrequency = 60000;
+            case "5 Minutes" -> syncFrequency = 300000;
+            case "10 Minutes" -> syncFrequency = 600000;
+            case "30 Minutes" -> syncFrequency = 1800000;
+            case "60 Minutes" -> syncFrequency = 3600000;
         }
 
         mainScreenController.setSyncFrequency(syncFrequency);
