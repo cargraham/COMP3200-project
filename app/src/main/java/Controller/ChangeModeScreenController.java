@@ -90,6 +90,22 @@ public class ChangeModeScreenController {
     }
 
     @FXML
+    public void holidaySettings() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/HolidaySettingsScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        HolidaySettingsScreenController holidaySettingsScreenController = fxmlLoader.getController();
+        holidaySettingsScreenController.setMainScreenController(mainScreenController);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        stage.setTitle("Holiday Mode Settings");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
     public void confirmChoice(Event event){
         RadioButton selectedToggle = (RadioButton) group.getSelectedToggle();
 

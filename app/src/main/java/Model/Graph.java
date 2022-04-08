@@ -422,7 +422,7 @@ public class Graph {
 
         System.out.println(newBody);
 
-        return "<html>" + newBody + "<br><hr><br></html>";
+        return "<html><head></head><body>" + newBody + "<br><hr><br></body></html>";
     }
 
     public static void readMessage(Message message){

@@ -94,7 +94,7 @@
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Based on your chosen settings, you will only receive notifications from chosen senders, important emails or emails which include chosen keywords." wrappingWidth="385.0" />
                         <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="346.0">
                            <children>
-                              <Button fx:id="holidaySettingsButton" mnemonicParsing="false" prefWidth="145.0" text="Change Settings">
+                              <Button fx:id="holidaySettingsButton" mnemonicParsing="false" onAction="#holidaySettings" prefWidth="145.0" text="Change Settings">
                                  <HBox.margin>
                                     <Insets top="5.0" />
                                  </HBox.margin></Button>

@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Graph;
+import Model.Holiday;
 import Model.Mode;
 import com.microsoft.graph.models.*;
 import javafx.application.Platform;
@@ -23,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 
 import java.awt.*;
@@ -94,11 +96,14 @@ public class MainScreenController {
     public HashMap<String, String> folderMap = new HashMap<>();
     public Timer timer = new Timer();
 
-    private Mode mode = Mode.NORMAL;
+    private Mode mode = Mode.NORMAL; //TODO initialise through text file settings
+    private Holiday holiday = Holiday.NONE;
     private long syncFrequency = 60000;
     private int notificationCount = 0;
     private int notificationThreshold = 5;
-    private final int notificationLength = 40;
+    private final int notificationLength = 50;
+    private ArrayList<String> senders = new ArrayList<>();
+    private ArrayList<String> keywords = new ArrayList<>();
 
     /*
     * GETTERS AND SETTERS
@@ -119,12 +124,36 @@ public class MainScreenController {
         this.mode = mode;
     }
 
+    public Holiday getHoliday() {
+        return holiday;
+    }
+
+    public void setHoliday(Holiday holiday) {
+        this.holiday = holiday;
+    }
+
     public long getSyncFrequency() {
         return syncFrequency;
     }
 
     public void setSyncFrequency(long syncFrequency) {
         this.syncFrequency = syncFrequency;
+    }
+
+    public void setSenders(ArrayList<String> senders) {
+        this.senders = senders;
+    }
+
+    public ArrayList<String> getSenders() {
+        return senders;
+    }
+
+    public void setKeywords(ArrayList<String> keywords) {
+        this.keywords = keywords;
+    }
+
+    public ArrayList<String> getKeywords() {
+        return keywords;
     }
 
     public void listMessages(String folderName){
@@ -359,21 +388,51 @@ public class MainScreenController {
 
     public void sendNotification(String sender, String subject, String bodyPreview){
 
+        String ellipsis = "...";
+
         if(sender.length() > notificationLength){
-            sender = sender.substring(0, notificationLength) + "...";
+            sender = sender.substring(0, notificationLength) + ellipsis;
         }
 
         if(subject.length() > notificationLength){
-            subject = subject.substring(0, notificationLength) + "...";
+            subject = subject.substring(0, notificationLength) + ellipsis;
         }
 
         if(bodyPreview.length() > notificationLength){
-            bodyPreview = bodyPreview.replaceAll("(\r\n|\r|\n)", "").substring(0, notificationLength) + "...";
+            bodyPreview = bodyPreview.replaceAll("(\r\n|\r|\n)", "").substring(0, notificationLength) + ellipsis;
         }
 
-        Notifications.create()
+        Notifications.create() //TODO take to inbox when clicked on?
                 .title(sender)
                 .text(subject + System.lineSeparator() + bodyPreview)
+                .hideAfter(new Duration(5000))
+                .show();
+    }
+
+    public void sendModeNotification(String mode, String sender, String subject, String bodyPreview){
+
+        String ellipsis = "...";
+
+        if(mode.length() > notificationLength){
+            mode = mode.substring(0, notificationLength) + ellipsis;
+        }
+
+        if(sender.length() > notificationLength){
+            sender = sender.substring(0, notificationLength) + ellipsis;
+        }
+
+        if(subject.length() > notificationLength){
+            subject = subject.substring(0, notificationLength) + ellipsis;
+        }
+
+        if(bodyPreview.length() > notificationLength){
+            bodyPreview = bodyPreview.replaceAll("(\r\n|\r|\n)", "").substring(0, notificationLength) + ellipsis;
+        }
+
+        Notifications.create() //TODO take to inbox when clicked on?
+                .title(mode + System.lineSeparator() + sender)
+                .text(subject + System.lineSeparator() + bodyPreview)
+                .hideAfter(new Duration(5000))
                 .show();
     }
 
@@ -382,7 +441,6 @@ public class MainScreenController {
         logIn();
         loadFolders();
         listMessages(folderMap.get("Inbox"));
-        //Graph.createSubscription();
         syncTimer();
 
         //first message is selected on load - TODO should probably have its own method
@@ -513,7 +571,7 @@ public class MainScreenController {
         timer = new Timer();
     }
 
-    public void syncTimer(){ //take current folder?
+    public void syncTimer(){ //TODO could be done in a different class/file?
 
         timer.schedule(new TimerTask() {
             @Override
@@ -521,26 +579,22 @@ public class MainScreenController {
 
                 Platform.runLater(() -> {
 
-                    try{ //TODO if current folder is inbox
+                    try{ //TODO if current folder is inbox - maybe a difference map for inbox? Could just be list of IDs?
 
                         List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size()); //from graph
-                        List<Message> difference = new ArrayList<>(messageMap.values()); //from app
+                        List<Message> difference = new ArrayList<>(messageMap.values()); //from app - doesn't work if inbox isn't selected
 
                         Map<String, Message> messageIDMap = messages.stream().collect(Collectors.toMap(message -> message.id, message -> message));
                         Map<String, Message> differenceIDMap = difference.stream().collect(Collectors.toMap(message -> message.id, message -> message));
 
-                        List<String> messageSubjects = messages.stream().map(m -> m.subject).collect(Collectors.toList());
+                        /*List<String> messageSubjects = messages.stream().map(m -> m.subject).collect(Collectors.toList());
                         List<String> differencesSubjects = difference.stream().map(m -> m.subject).collect(Collectors.toList());
 
                         System.out.println(messageSubjects);
-                        System.out.println(differencesSubjects);
+                        System.out.println(differencesSubjects);*/
 
                         for(String id : differenceIDMap.keySet()){
                             messageIDMap.remove(id);
-                        }
-
-                        for(Message message : messageIDMap.values()){
-                            System.out.println(message.subject);
                         }
 
                         System.out.println("MESSAGE ID SIZE: " + messageIDMap.size());
@@ -572,9 +626,67 @@ public class MainScreenController {
                                 }
                             }
                             else if(mode == Mode.HOLIDAY){
+                                System.out.println("HOLIDAY MODE");
+                                System.out.println(holiday);
 
+                                for(Message message : messageIDMap.values()){
+
+                                    String sender = message.sender.emailAddress.address;
+                                    String subject = message.subject;
+                                    String bodyPreview = message.bodyPreview;
+
+                                    if(holiday.equals(Holiday.SENDERS)){ //TODO could do with cleaning up - maybe reorder?
+                                        if(fromSpecifiedSender(message)){
+                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                    else if(holiday.equals(Holiday.KEYWORDS)){
+                                        if(containsKeywords(message)){
+                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                    else if(holiday.equals(Holiday.IMPORTANT)){
+                                        if(isImportant(message)){
+                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                    else if(holiday.equals(Holiday.SENDERS_AND_KEYWORDS)){
+                                        if(fromSpecifiedSender(message)){
+                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
+                                        }
+                                        else if(containsKeywords(message)){
+                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                    else if(holiday.equals(Holiday.SENDERS_AND_IMPORTANT)){
+                                        if(fromSpecifiedSender(message)){
+                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
+                                        }
+                                        else if(isImportant(message)){
+                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                    else if(holiday.equals(Holiday.KEYWORDS_AND_IMPORTANT)){
+                                        if(containsKeywords(message)){
+                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
+                                        }
+                                        else if(isImportant(message)){
+                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                    else if(holiday.equals(Holiday.SENDERS_AND_KEYWORDS_AND_IMPORTANT)){
+                                        if(fromSpecifiedSender(message)){
+                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
+                                        }
+                                        else if(containsKeywords(message)){
+                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
+                                        }
+                                        else if(isImportant(message)){
+                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
+                                        }
+                                    }
+                                }
                             }
-
 
                             listMessages("inbox");
                         }
@@ -585,5 +697,34 @@ public class MainScreenController {
                 });
             }
         }, 0, syncFrequency);
+    }
+
+    public boolean fromSpecifiedSender(Message message){
+
+        return senders.contains(message.sender.emailAddress.address);
+    }
+
+    public boolean containsKeywords(Message message){
+
+        String lowercaseSubject = message.subject.toLowerCase();
+        String lowercaseBody = message.body.content.toLowerCase(Locale.ROOT);
+
+        boolean contains = false;
+
+        for(String keyword : keywords){
+            if(lowercaseBody.contains(keyword) || lowercaseSubject.contains(keyword)){
+                contains = true;
+                break;
+            }
+        }
+
+        return contains;
+    }
+
+    public boolean isImportant(Message message){
+
+        Importance importance = message.importance;
+
+        return importance.equals(Importance.HIGH);
     }
 }
