@@ -1,5 +1,6 @@
 package Controller;
 
+import Model.Disturb;
 import Model.Graph;
 import Model.Holiday;
 import Model.Mode;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -98,6 +100,8 @@ public class MainScreenController {
 
     private Mode mode = Mode.NORMAL; //TODO initialise through text file settings
     private Holiday holiday = Holiday.NONE;
+    private Disturb disturb = Disturb.OFF;
+    private Date disturbTime;
     private long syncFrequency = 60000;
     private int notificationCount = 0;
     private int notificationThreshold = 5;
@@ -130,6 +134,22 @@ public class MainScreenController {
 
     public void setHoliday(Holiday holiday) {
         this.holiday = holiday;
+    }
+
+    public Disturb getDisturb() {
+        return disturb;
+    }
+
+    public void setDisturb(Disturb disturb) {
+        this.disturb = disturb;
+    }
+
+    public Date getDisturbTime() {
+        return disturbTime;
+    }
+
+    public void setDisturbTime(Date disturbTime) {
+        this.disturbTime = disturbTime;
     }
 
     public long getSyncFrequency() {
@@ -303,7 +323,7 @@ public class MainScreenController {
                 child.setStyle("-fx-font-weight: normal;");
             }
 
-            Graph.readMessage(selectedMessage);
+            Graph.readMessage(selectedMessage); //TODO might need a try catch - socket timeout exception
             selectMessage(selectedMessage);
         }
     }
@@ -581,115 +601,121 @@ public class MainScreenController {
 
                     try{ //TODO if current folder is inbox - maybe a difference map for inbox? Could just be list of IDs?
 
-                        List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size()); //from graph
-                        List<Message> difference = new ArrayList<>(messageMap.values()); //from app - doesn't work if inbox isn't selected
+                        System.out.println("MODE: " + mode);
 
-                        Map<String, Message> messageIDMap = messages.stream().collect(Collectors.toMap(message -> message.id, message -> message));
-                        Map<String, Message> differenceIDMap = difference.stream().collect(Collectors.toMap(message -> message.id, message -> message));
+                        if(mode != Mode.DISTURB || (mode == Mode.DISTURB && disturb == Disturb.OFF)){
+                            List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size()); //from graph
+                            List<Message> difference = new ArrayList<>(messageMap.values()); //from app - doesn't work if inbox isn't selected
 
-                        /*List<String> messageSubjects = messages.stream().map(m -> m.subject).collect(Collectors.toList());
-                        List<String> differencesSubjects = difference.stream().map(m -> m.subject).collect(Collectors.toList());
+                            Map<String, Message> messageIDMap = messages.stream().collect(Collectors.toMap(message -> message.id, message -> message));
+                            Map<String, Message> differenceIDMap = difference.stream().collect(Collectors.toMap(message -> message.id, message -> message));
 
-                        System.out.println(messageSubjects);
-                        System.out.println(differencesSubjects);*/
+                            for(String id : differenceIDMap.keySet()){
+                                messageIDMap.remove(id);
+                            }
 
-                        for(String id : differenceIDMap.keySet()){
-                            messageIDMap.remove(id);
+                            System.out.println("MESSAGE ID SIZE: " + messageIDMap.size());
+
+                            if (messageIDMap.size() > 0){
+                                if(mode == Mode.NORMAL){
+                                    for(Message message : messageIDMap.values()){
+
+                                        String sender = message.sender.emailAddress.name;
+                                        String subject = message.subject;
+                                        String bodyPreview = message.bodyPreview;
+                                        sendNotification(sender, subject, bodyPreview);
+                                    }
+                                }
+                                else if(mode == Mode.CONCENTRATED){
+
+                                    notificationCount += messageIDMap.size();
+
+                                    System.out.println("IN CONCENTRATED MODE, NOTIFICATION THRESHOLD: " + notificationThreshold);
+                                    System.out.println("NOTIFICATION COUNT: " + notificationCount);
+
+
+                                    if(notificationCount >= notificationThreshold){
+                                        sendNotification("Concentrated Mode", "You have " + notificationCount + " new emails in your Inbox", "");
+                                        notificationCount = 0;
+                                    }
+                                }
+                                else if(mode == Mode.HOLIDAY){
+                                    System.out.println("HOLIDAY MODE");
+                                    System.out.println(holiday);
+
+                                    for(Message message : messageIDMap.values()){
+
+                                        String sender = message.sender.emailAddress.address;
+                                        String subject = message.subject;
+                                        String bodyPreview = message.bodyPreview;
+
+                                        if(holiday.equals(Holiday.SENDERS)){ //TODO could do with cleaning up - maybe reorder?
+                                            if(fromSpecifiedSender(message)){
+                                                senderHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                        }
+                                        else if(holiday.equals(Holiday.KEYWORDS)){
+                                            if(containsKeywords(message)){
+                                                keywordHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                        }
+                                        else if(holiday.equals(Holiday.IMPORTANT)){
+                                            if(isImportant(message)){
+                                                importantHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                        }
+                                        else if(holiday.equals(Holiday.SENDERS_AND_KEYWORDS)){
+                                            if(fromSpecifiedSender(message)){
+                                                senderHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                            else if(containsKeywords(message)){
+                                                keywordHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                        }
+                                        else if(holiday.equals(Holiday.SENDERS_AND_IMPORTANT)){
+                                            if(fromSpecifiedSender(message)){
+                                                senderHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                            else if(isImportant(message)){
+                                                importantHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                        }
+                                        else if(holiday.equals(Holiday.KEYWORDS_AND_IMPORTANT)){
+                                            if(containsKeywords(message)){
+                                                keywordHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                            else if(isImportant(message)){
+                                                importantHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                        }
+                                        else if(holiday.equals(Holiday.SENDERS_AND_KEYWORDS_AND_IMPORTANT)){
+                                            if(fromSpecifiedSender(message)){
+                                                senderHolidayNotification(sender, subject, bodyPreview);
+                                            }
+                                            else if(containsKeywords(message)){
+
+                                            }
+                                            else if(isImportant(message)){
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else{
+
+                            Date now = new Date();
+
+                            if(disturb == Disturb.TIMED_1_HOUR || disturb == Disturb.TIMED_8_HOURS || disturb == Disturb.TIMED_24_HOURS || disturb == Disturb.TIMED_UNTIL){
+                                if(now.compareTo(disturbTime) >= 0){
+                                    mode = Mode.NORMAL;
+                                    disturb = Disturb.OFF;
+                                }
+                            }
                         }
 
-                        System.out.println("MESSAGE ID SIZE: " + messageIDMap.size());
-
-                        if (messageIDMap.size() > 0){
-                            if(mode == Mode.NORMAL){
-                                for(Message message : messageIDMap.values()){
-
-                                    String sender = message.sender.emailAddress.name;
-                                    String subject = message.subject;
-                                    String bodyPreview = message.bodyPreview;
-                                    sendNotification(sender, subject, bodyPreview);
-                                }
-                            }
-                            /*else if(mode == Mode.DISTURB){
-
-                            }*/
-                            else if(mode == Mode.CONCENTRATED){
-
-                                notificationCount += messageIDMap.size();
-
-                                System.out.println("IN CONCENTRATED MODE, NOTIFICATION THRESHOLD: " + notificationThreshold);
-                                System.out.println("NOTIFICATION COUNT: " + notificationCount);
-
-
-                                if(notificationCount >= notificationThreshold){
-                                    sendNotification("Concentrated Mode", "You have " + notificationCount + " new emails in your Inbox", "");
-                                    notificationCount = 0;
-                                }
-                            }
-                            else if(mode == Mode.HOLIDAY){
-                                System.out.println("HOLIDAY MODE");
-                                System.out.println(holiday);
-
-                                for(Message message : messageIDMap.values()){
-
-                                    String sender = message.sender.emailAddress.address;
-                                    String subject = message.subject;
-                                    String bodyPreview = message.bodyPreview;
-
-                                    if(holiday.equals(Holiday.SENDERS)){ //TODO could do with cleaning up - maybe reorder?
-                                        if(fromSpecifiedSender(message)){
-                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                    else if(holiday.equals(Holiday.KEYWORDS)){
-                                        if(containsKeywords(message)){
-                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                    else if(holiday.equals(Holiday.IMPORTANT)){
-                                        if(isImportant(message)){
-                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                    else if(holiday.equals(Holiday.SENDERS_AND_KEYWORDS)){
-                                        if(fromSpecifiedSender(message)){
-                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
-                                        }
-                                        else if(containsKeywords(message)){
-                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                    else if(holiday.equals(Holiday.SENDERS_AND_IMPORTANT)){
-                                        if(fromSpecifiedSender(message)){
-                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
-                                        }
-                                        else if(isImportant(message)){
-                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                    else if(holiday.equals(Holiday.KEYWORDS_AND_IMPORTANT)){
-                                        if(containsKeywords(message)){
-                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
-                                        }
-                                        else if(isImportant(message)){
-                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                    else if(holiday.equals(Holiday.SENDERS_AND_KEYWORDS_AND_IMPORTANT)){
-                                        if(fromSpecifiedSender(message)){
-                                            sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
-                                        }
-                                        else if(containsKeywords(message)){
-                                            sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
-                                        }
-                                        else if(isImportant(message)){
-                                            sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
-                                        }
-                                    }
-                                }
-                            }
-
-                            listMessages("inbox");
-                        }
+                        listMessages("inbox");
 
                     } catch (Exception e){
                         System.out.println(e);
@@ -726,5 +752,17 @@ public class MainScreenController {
         Importance importance = message.importance;
 
         return importance.equals(Importance.HIGH);
+    }
+
+    public void senderHolidayNotification(String sender, String subject, String bodyPreview){
+        sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
+    }
+
+    public void keywordHolidayNotification(String sender, String subject, String bodyPreview){
+        sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
+    }
+
+    public void importantHolidayNotification(String sender, String subject, String bodyPreview){
+        sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
     }
 }

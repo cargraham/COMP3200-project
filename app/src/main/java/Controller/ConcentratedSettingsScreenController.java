@@ -19,7 +19,6 @@ public class ConcentratedSettingsScreenController {
     @FXML
     public Button confirmButton;
 
-    public ChangeModeScreenController changeModeScreenController;
     public MainScreenController mainScreenController;
     public int notificationThreshold;
 
@@ -39,11 +38,6 @@ public class ConcentratedSettingsScreenController {
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
-    }
-
-    //don't think I need this
-    public void setChangeModeScreenController(ChangeModeScreenController changeModeScreenController){
-        this.changeModeScreenController = changeModeScreenController;
     }
 
     public void setMainScreenController(MainScreenController mainScreenController){

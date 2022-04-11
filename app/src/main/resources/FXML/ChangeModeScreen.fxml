@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ChangeModeScreenController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ChangeModeScreenController">
    <children>
       <VBox prefHeight="400.0" prefWidth="600.0">
          <children>
@@ -68,7 +68,7 @@
                         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Based on your chosen settings, you will not receive notifications during a specific time window." wrappingWidth="385.0" />
                         <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="346.0">
                            <children>
-                              <Button fx:id="disturbSettingsButton" mnemonicParsing="false" prefWidth="145.0" text="Change Settings">
+                              <Button fx:id="disturbSettingsButton" mnemonicParsing="false" onAction="#disturbSettings" prefWidth="145.0" text="Change Settings">
                                  <HBox.margin>
                                     <Insets top="5.0" />
                                  </HBox.margin></Button>

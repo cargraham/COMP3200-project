@@ -1,5 +1,6 @@
 package Controller;
 
+import Model.Disturb;
 import Model.Mode;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -52,6 +53,7 @@ public class ChangeModeScreenController {
 
     @FXML
     public void initialize(){
+
         normalRadioButton.setToggleGroup(group);
         disturbRadioButton.setToggleGroup(group);
         concentratedRadioButton.setToggleGroup(group);
@@ -59,6 +61,7 @@ public class ChangeModeScreenController {
     }
 
     public void setMainScreenController(MainScreenController mainScreenController){
+
         this.mainScreenController = mainScreenController;
         mode = mainScreenController.getMode();
 
@@ -71,6 +74,22 @@ public class ChangeModeScreenController {
     }
 
     @FXML
+    public void disturbSettings() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/DisturbSettingsScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        DisturbSettingsScreenController disturbSettingsScreenController = fxmlLoader.getController();
+        disturbSettingsScreenController.setMainScreenController(mainScreenController);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        stage.setTitle("Do Not Disturb Settings");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
     public void concentratedSettings() throws IOException {
 
         //TODO can't access windows behind this one?
@@ -79,7 +98,6 @@ public class ChangeModeScreenController {
         Parent root = fxmlLoader.load();
 
         ConcentratedSettingsScreenController concentratedSettingsScreenController = fxmlLoader.getController();
-        concentratedSettingsScreenController.setChangeModeScreenController(this);
         concentratedSettingsScreenController.setMainScreenController(mainScreenController);
 
         Stage stage = new Stage();
@@ -107,6 +125,7 @@ public class ChangeModeScreenController {
 
     @FXML
     public void confirmChoice(Event event){
+
         RadioButton selectedToggle = (RadioButton) group.getSelectedToggle();
 
         switch (selectedToggle.getText()) {
@@ -114,6 +133,10 @@ public class ChangeModeScreenController {
             case "Do Not Disturb Mode" -> mode = Mode.DISTURB;
             case "Concentrated Mode" -> mode = Mode.CONCENTRATED;
             case "Holiday Mode" -> mode = Mode.HOLIDAY;
+        }
+
+        if(mainScreenController.getMode() == Mode.DISTURB && mainScreenController.getDisturb() == Disturb.OFF){
+            mode = Mode.NORMAL;
         }
 
         mainScreenController.setMode(mode);
@@ -125,6 +148,7 @@ public class ChangeModeScreenController {
 
     @FXML
     public void cancel(Event event){
+
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
