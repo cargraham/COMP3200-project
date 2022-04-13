@@ -9,8 +9,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import tornadofx.control.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -42,13 +40,13 @@ public class DisturbSettingsScreenController {
     public Spinner<Integer> hourPicker;
 
     @FXML
-    public Text hoursText;
+    public Label hoursLabel;
 
     @FXML
     public Spinner<Integer> minutePicker;
 
     @FXML
-    public Text minutesText;
+    public Label minuteLabel;
 
     @FXML
     public HBox untilHbox;
@@ -121,9 +119,9 @@ public class DisturbSettingsScreenController {
             radioButtonUntil.setDisable(true);
             datePicker.setDisable(true);
             hourPicker.setDisable(true);
-            hoursText.setDisable(true);
+            hoursLabel.setDisable(true);
             minutePicker.setDisable(true);
-            minutesText.setDisable(true);
+            minuteLabel.setDisable(true);
             toggleButton.setText("Turn Do Not Disturb Mode Off");
         }
         else{
@@ -133,9 +131,9 @@ public class DisturbSettingsScreenController {
             radioButtonUntil.setDisable(false);
             datePicker.setDisable(false);
             hourPicker.setDisable(false);
-            hoursText.setDisable(false);
+            hoursLabel.setDisable(false);
             minutePicker.setDisable(false);
-            minutesText.setDisable(false);
+            minuteLabel.setDisable(false);
             toggleButton.setText("Turn Do Not Disturb Mode On");
         }
     }

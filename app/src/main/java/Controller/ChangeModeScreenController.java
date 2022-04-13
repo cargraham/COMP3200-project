@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -74,6 +75,25 @@ public class ChangeModeScreenController {
     }
 
     @FXML
+    public void showChangeSyncFrequency() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeSyncFrequencyScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        ChangeSyncFrequencyScreenController changeSyncFrequencyScreenController = fxmlLoader.getController();
+        changeSyncFrequencyScreenController.setMainScreenController(mainScreenController);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 300, 200);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setResizable(false);
+        stage.setTitle("Change Sync Frequency");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
     public void disturbSettings() throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/DisturbSettingsScreen.fxml"));
@@ -84,7 +104,10 @@ public class ChangeModeScreenController {
 
         Stage stage = new Stage();
         Scene scene = new Scene(root, 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setResizable(false);
         stage.setTitle("Do Not Disturb Settings");
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
         stage.show();
     }
@@ -102,7 +125,10 @@ public class ChangeModeScreenController {
 
         Stage stage = new Stage();
         Scene scene = new Scene(root, 500, 250);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setResizable(false);
         stage.setTitle("Concentrated Mode Settings");
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
         stage.show();
     }
@@ -118,7 +144,10 @@ public class ChangeModeScreenController {
 
         Stage stage = new Stage();
         Scene scene = new Scene(root, 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setResizable(false);
         stage.setTitle("Holiday Mode Settings");
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
         stage.show();
     }

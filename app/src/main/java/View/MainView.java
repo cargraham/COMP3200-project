@@ -14,7 +14,7 @@ public class MainView extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/MainScreen.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 500, 300);
-        //scene.getStylesheets().add("stylesheet.css");
+        scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Email Client");
         stage.setMaximized(true);
         stage.setScene(scene);

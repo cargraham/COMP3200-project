@@ -18,7 +18,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 <?import javafx.scene.web.WebView?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
@@ -42,11 +41,11 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TabPane prefHeight="120.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="123.0" prefWidth="600.0" stylesheets="@../stylesheet.css" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="Home">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
+              <AnchorPane id="tabAnchorPane" minHeight="0.0" minWidth="0.0" prefWidth="600.0">
                      <children>
                         <HBox alignment="CENTER_LEFT" layoutY="1.0" spacing="5.0">
                            <children>
@@ -93,11 +92,6 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" spacing="5.0">
                            <children>
-                              <Button fx:id="syncFrequencyButton" mnemonicParsing="false" onAction="#showChangeSyncFrequency" prefHeight="80.0" prefWidth="65.0" text="Change Sync Frequency" textAlignment="CENTER" wrapText="true">
-                                 <padding>
-                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                 </padding>
-                              </Button>
                               <Button fx:id="changeModeButton" mnemonicParsing="false" onAction="#changeMode" prefHeight="80.0" prefWidth="65.0" text="Change Mode" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -120,9 +114,9 @@
          <children>
             <SplitPane dividerPositions="0.29797979797979796, 0.5" HBox.hgrow="ALWAYS">
               <items>
-                  <TreeView fx:id="foldersList" maxWidth="300.0" minWidth="200.0" onMouseClicked="#handleFoldersListClick" prefWidth="200.0" />
+                  <TreeView id="tree-view" fx:id="foldersList" maxWidth="300.0" minWidth="200.0" onMouseClicked="#handleFoldersListClick" prefWidth="200.0" stylesheets="@../stylesheet.css" />
                   <ListView fx:id="messageListView" maxWidth="340.0" onKeyPressed="#handleListViewKeyPress" onMouseClicked="#handleListViewClick" prefWidth="340.0" />
-                  <VBox fx:id="messageHeader" spacing="5.0">
+                  <VBox id="messageVbox" spacing="5.0">
                      <children>
                         <Label fx:id="senderText" />
                         <Label fx:id="recipientText" />
@@ -130,7 +124,6 @@
                         <Label fx:id="timeStampText" />
                         <HBox fx:id="attachmentsHbox" prefWidth="200.0" />
                         <Separator prefWidth="200.0" />
-                        <Text fx:id="bodyText" strokeType="OUTSIDE" strokeWidth="0.0" />
                         <WebView fx:id="webView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                      </children>
                      <padding>

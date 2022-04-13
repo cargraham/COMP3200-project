@@ -25,6 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.stage.Modality;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 
@@ -33,7 +34,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -45,9 +45,6 @@ public class MainScreenController {
 
     @FXML
     public ListView<VBox> messageListView;
-
-    @FXML
-    public VBox messageHeader; //TODO don't need?
 
     @FXML
     public Label senderText;
@@ -87,9 +84,6 @@ public class MainScreenController {
 
     @FXML
     public Button forwardButton;
-
-    @FXML
-    public Button syncFrequencyButton;
 
     @FXML
     public Button changeModeButton;
@@ -337,10 +331,13 @@ public class MainScreenController {
     }
 
     @FXML
-    public void handleFoldersListClick() throws ParseException {
+    public void handleFoldersListClick() {
 
-        listMessages(folderMap.get(foldersList.getSelectionModel().getSelectedItem().getValue()));
-        //TODO create local variable to keep track of current folder - lowercase and remove spaces
+        //doesn't let you select parent nodes
+        if(foldersList.getSelectionModel().getSelectedItem().isLeaf()){
+            listMessages(folderMap.get(foldersList.getSelectionModel().getSelectedItem().getValue()));
+            //TODO create local variable to keep track of current folder - lowercase and remove spaces
+        }
     }
 
     public void loadFolders(){
@@ -478,6 +475,7 @@ public class MainScreenController {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/NewEmailScreen.fxml"));
         Stage stage = new Stage();
         Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("New Email");
         stage.setScene(scene);
         stage.show();
@@ -511,6 +509,7 @@ public class MainScreenController {
 
         Stage stage = new Stage();
         Scene scene = new Scene(root, 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Reply to Email");
         stage.setScene(scene);
         stage.show();
@@ -532,6 +531,7 @@ public class MainScreenController {
 
         Stage stage = new Stage();
         Scene scene = new Scene(root, 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Reply All to Email");
         stage.setScene(scene);
         stage.show();
@@ -550,29 +550,15 @@ public class MainScreenController {
 
         Stage stage = new Stage();
         Scene scene = new Scene(root, 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Forward Email");
         stage.setScene(scene);
         stage.show();
     }
 
     @FXML
-    public void showChangeSyncFrequency() throws IOException {
-
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeSyncFrequencyScreen.fxml"));
-        Parent root = fxmlLoader.load();
-
-        ChangeSyncFrequencyScreenController changeSyncFrequencyScreenController = fxmlLoader.getController();
-        changeSyncFrequencyScreenController.setMainScreenController(this);
-
-        Stage stage = new Stage();
-        Scene scene = new Scene(root, 300, 200);
-        stage.setTitle("Change Sync Frequency");
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    @FXML
     public void changeMode() throws IOException {
+
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeModeScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -580,8 +566,11 @@ public class MainScreenController {
         changeModeScreenController.setMainScreenController(this);
 
         Stage stage = new Stage();
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 600, 420);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setResizable(false);
         stage.setTitle("Change Mode");
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(scene);
         stage.show();
     }

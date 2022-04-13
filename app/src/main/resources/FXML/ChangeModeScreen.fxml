@@ -2,111 +2,124 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ChangeModeScreenController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="420.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.ChangeModeScreenController">
    <children>
       <VBox prefHeight="400.0" prefWidth="600.0">
          <children>
-            <GridPane prefHeight="387.0" prefWidth="600.0">
-              <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="294.0" minWidth="10.0" prefWidth="174.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="479.99998982747394" minWidth="10.0" prefWidth="386.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+            <VBox prefWidth="539.0" spacing="3.0">
                <children>
                   <VBox>
                      <children>
-                        <RadioButton fx:id="normalRadioButton" mnemonicParsing="false" text="Normal" />
-                     </children>
-                  </VBox>
-                  <VBox GridPane.rowIndex="1">
-                     <children>
-                        <RadioButton fx:id="disturbRadioButton" mnemonicParsing="false" text="Do Not Disturb Mode" />
-                     </children>
-                  </VBox>
-                  <VBox GridPane.rowIndex="2">
-                     <children>
-                        <RadioButton fx:id="concentratedRadioButton" mnemonicParsing="false" text="Concentrated Mode" />
-                     </children>
-                  </VBox>
-                  <VBox GridPane.rowIndex="3">
-                     <children>
-                        <RadioButton fx:id="holidayRadioButton" mnemonicParsing="false" text="Holiday Mode" />
-                     </children>
-                  </VBox>
-                  <VBox GridPane.columnIndex="1">
-                     <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="You will receive notifications based on your chosen Sync Frequency." wrappingWidth="385.0" />
-                        <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="346.0">
-                           <children>
-                              <Button fx:id="syncFrequencyButton" mnemonicParsing="false" prefWidth="145.0" text="Change Sync Frequency">
-                                 <HBox.margin>
-                                    <Insets top="5.0" />
-                                 </HBox.margin></Button>
-                           </children>
+                        <RadioButton fx:id="normalRadioButton" mnemonicParsing="false" text="Normal">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></RadioButton>
+                        <Label text="You will receive notifications based on your chosen Sync Frequency.">
                            <VBox.margin>
-                              <Insets />
+                              <Insets left="23.0" />
                            </VBox.margin>
-                        </HBox>
-                     </children>
-                  </VBox>
-                  <VBox GridPane.columnIndex="1" GridPane.rowIndex="1">
-                     <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Based on your chosen settings, you will not receive notifications during a specific time window." wrappingWidth="385.0" />
-                        <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="346.0">
+                        </Label>
+                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="580.0">
                            <children>
-                              <Button fx:id="disturbSettingsButton" mnemonicParsing="false" onAction="#disturbSettings" prefWidth="145.0" text="Change Settings">
+                              <Button fx:id="syncFrequencyButton" mnemonicParsing="false" onAction="#showChangeSyncFrequency" prefWidth="170.0" text="Change Sync Frequency">
                                  <HBox.margin>
                                     <Insets top="5.0" />
-                                 </HBox.margin></Button>
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox GridPane.columnIndex="1" GridPane.rowIndex="2">
+                  <VBox>
                      <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Based on your chosen settings, you will only receive a notification when there is a specified number of new emails in your inbox" wrappingWidth="385.0" />
-                        <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="346.0">
+                        <RadioButton fx:id="disturbRadioButton" mnemonicParsing="false" text="Do Not Disturb Mode">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></RadioButton>
+                        <Label text="Based on your chosen settings, you will not receive notifications during a specific time window." wrapText="true">
+                           <VBox.margin>
+                              <Insets left="23.0" />
+                           </VBox.margin>
+                        </Label>
+                        <HBox alignment="TOP_RIGHT" prefHeight="12.0" prefWidth="580.0">
                            <children>
-                              <Button fx:id="concentratedSettingsButton" mnemonicParsing="false" onAction="#concentratedSettings" prefWidth="145.0" text="Change Settings">
+                              <Button fx:id="disturbSettingsButton" mnemonicParsing="false" onAction="#disturbSettings" prefWidth="170.0" text="Change Settings">
                                  <HBox.margin>
                                     <Insets top="5.0" />
-                                 </HBox.margin></Button>
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox GridPane.columnIndex="1" GridPane.rowIndex="3">
+                  <VBox>
                      <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Based on your chosen settings, you will only receive notifications from chosen senders, important emails or emails which include chosen keywords." wrappingWidth="385.0" />
-                        <HBox alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="346.0">
+                        <RadioButton fx:id="concentratedRadioButton" mnemonicParsing="false" text="Concentrated Mode">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></RadioButton>
+                        <Label prefHeight="63.0" prefWidth="521.0" text="Based on your chosen settings, you will only receive a notification when there is a specified number of new emails in your inbox." wrapText="true">
+                           <VBox.margin>
+                              <Insets left="23.0" />
+                           </VBox.margin>
+                        </Label>
+                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="580.0">
                            <children>
-                              <Button fx:id="holidaySettingsButton" mnemonicParsing="false" onAction="#holidaySettings" prefWidth="145.0" text="Change Settings">
+                              <Button fx:id="concentratedSettingsButton" mnemonicParsing="false" onAction="#concentratedSettings" prefWidth="170.0" text="Change Settings">
                                  <HBox.margin>
                                     <Insets top="5.0" />
-                                 </HBox.margin></Button>
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <VBox>
+                     <children>
+                        <RadioButton fx:id="holidayRadioButton" mnemonicParsing="false" text="Holiday Mode">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font></RadioButton>
+                        <Label prefHeight="63.0" prefWidth="521.0" text="Based on your chosen settings, you will only receive notifications from chosen senders, important emails or emails which include chosen keywords." wrapText="true">
+                           <VBox.margin>
+                              <Insets left="23.0" />
+                           </VBox.margin>
+                        </Label>
+                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="580.0">
+                           <children>
+                              <Button fx:id="holidaySettingsButton" mnemonicParsing="false" onAction="#holidaySettings" prefWidth="170.0" text="Change Settings">
+                                 <HBox.margin>
+                                    <Insets top="5.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                      </children>
                   </VBox>
                </children>
-               <padding>
+               <VBox.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </padding>
-            </GridPane>
+               </VBox.margin>
+            </VBox>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
                   <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" prefHeight="20.0" prefWidth="80.0" text="Cancel" />
