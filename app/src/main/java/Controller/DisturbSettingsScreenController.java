@@ -5,8 +5,6 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -49,9 +47,6 @@ public class DisturbSettingsScreenController {
     public Label minuteLabel;
 
     @FXML
-    public HBox untilHbox;
-
-    @FXML
     public Button cancelButton;
 
     @FXML
@@ -60,17 +55,17 @@ public class DisturbSettingsScreenController {
     private MainScreenController mainScreenController;
     private Disturb disturb;
     private Date disturbTime;
-    private final ToggleGroup group = new ToggleGroup();
+    private final ToggleGroup toggleGroup = new ToggleGroup();
 
     @FXML
     public void initialize(){
 
+        radioButton1Hour.setToggleGroup(toggleGroup);
+        radioButton8Hours.setToggleGroup(toggleGroup);
+        radioButton24Hours.setToggleGroup(toggleGroup);
+        radioButtonUntil.setToggleGroup(toggleGroup);
 
-        radioButton1Hour.setToggleGroup(group);
-        radioButton8Hours.setToggleGroup(group);
-        radioButton24Hours.setToggleGroup(group);
-        radioButtonUntil.setToggleGroup(group);
-
+        datePicker.setShowWeekNumbers(false);
         hourPicker.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 0, 1));
         minutePicker.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0, 1));
     }
@@ -94,10 +89,10 @@ public class DisturbSettingsScreenController {
         }
 
         switch (disturb){
-            case TIMED_1_HOUR -> group.selectToggle(radioButton1Hour);
-            case TIMED_8_HOURS -> group.selectToggle(radioButton8Hours);
-            case TIMED_24_HOURS -> group.selectToggle(radioButton24Hours);
-            case TIMED_UNTIL -> group.selectToggle(radioButtonUntil);
+            case TIMED_1_HOUR -> toggleGroup.selectToggle(radioButton1Hour);
+            case TIMED_8_HOURS -> toggleGroup.selectToggle(radioButton8Hours);
+            case TIMED_24_HOURS -> toggleGroup.selectToggle(radioButton24Hours);
+            case TIMED_UNTIL -> toggleGroup.selectToggle(radioButtonUntil);
             case ON -> {
                 toggleButton.setSelected(true);
                 toggleMode();
@@ -141,7 +136,7 @@ public class DisturbSettingsScreenController {
     @FXML
     public void confirmChoice(Event event){
 
-        RadioButton selectedToggle = (RadioButton) group.getSelectedToggle();
+        RadioButton selectedToggle = (RadioButton) toggleGroup.getSelectedToggle();
 
         if(toggleButton.isSelected()){
             disturb = Disturb.ON;
@@ -175,8 +170,7 @@ public class DisturbSettingsScreenController {
                     disturb = Disturb.TIMED_UNTIL;
                     LocalDate date1 = datePicker.getValue();
                     LocalDateTime ldt = date1.atTime(hourPicker.getValue(), minutePicker.getValue());
-                    Date out = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-                    disturbTime = out;
+                    disturbTime = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
                 }
             }
 

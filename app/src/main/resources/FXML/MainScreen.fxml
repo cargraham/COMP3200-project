@@ -49,7 +49,7 @@
                      <children>
                         <HBox alignment="CENTER_LEFT" layoutY="1.0" spacing="5.0">
                            <children>
-                              <Button fx:id="newEmailButton" mnemonicParsing="false" onAction="#launchNewEmailWindow" prefHeight="80.0" prefWidth="65.0" text="New Email" textAlignment="CENTER" wrapText="true">
+                              <Button fx:id="newEmailButton" mnemonicParsing="false" onAction="#newEmail" prefHeight="80.0" prefWidth="65.0" text="New Email" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
@@ -70,6 +70,11 @@
                                  </padding>
                               </Button>
                               <Button fx:id="forwardButton" mnemonicParsing="false" onAction="#forwardMessage" prefHeight="80.0" prefWidth="65.0" text="Forward" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="editDraftButton" mnemonicParsing="false" onAction="#editDraft" prefHeight="80.0" prefWidth="65.0" text="Edit Draft" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
@@ -115,7 +120,7 @@
             <SplitPane dividerPositions="0.29797979797979796, 0.5" HBox.hgrow="ALWAYS">
               <items>
                   <TreeView id="tree-view" fx:id="foldersList" maxWidth="300.0" minWidth="200.0" onMouseClicked="#handleFoldersListClick" prefWidth="200.0" stylesheets="@../stylesheet.css" />
-                  <ListView fx:id="messageListView" maxWidth="340.0" onKeyPressed="#handleListViewKeyPress" onMouseClicked="#handleListViewClick" prefWidth="340.0" />
+                  <ListView fx:id="messageListView" maxWidth="340.0" prefWidth="340.0" />
                   <VBox id="messageVbox" spacing="5.0">
                      <children>
                         <Label fx:id="senderText" />

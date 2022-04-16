@@ -51,7 +51,7 @@
                   <Insets />
                </VBox.margin>
                <children>
-                  <HBox fx:id="untilHbox" alignment="CENTER" prefHeight="29.0" prefWidth="415.0" spacing="5.0">
+                  <HBox alignment="CENTER" prefHeight="29.0" prefWidth="415.0" spacing="5.0">
                      <children>
                         <DatePicker fx:id="datePicker" prefHeight="25.0" prefWidth="140.0">
                            <HBox.margin>

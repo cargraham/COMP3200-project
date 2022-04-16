@@ -19,8 +19,14 @@ public class ConcentratedSettingsScreenController {
     @FXML
     public Button confirmButton;
 
-    public MainScreenController mainScreenController;
-    public int notificationThreshold;
+    private MainScreenController mainScreenController;
+    private int notificationThreshold;
+
+    public void setMainScreenController(MainScreenController mainScreenController){
+        this.mainScreenController = mainScreenController;
+        notificationThreshold = mainScreenController.getNotificationThreshold();
+        spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, notificationThreshold, 1));
+    }
 
     @FXML
     public void confirmChoice(Event event){
@@ -38,11 +44,5 @@ public class ConcentratedSettingsScreenController {
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
-    }
-
-    public void setMainScreenController(MainScreenController mainScreenController){
-        this.mainScreenController = mainScreenController;
-        notificationThreshold = mainScreenController.getNotificationThreshold();
-        spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, notificationThreshold, 1));
     }
 }

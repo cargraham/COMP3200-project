@@ -50,15 +50,15 @@ public class ChangeModeScreenController {
 
     private MainScreenController mainScreenController;
     private Mode mode;
-    private final ToggleGroup group = new ToggleGroup();
+    private final ToggleGroup toggleGroup = new ToggleGroup();
 
     @FXML
     public void initialize(){
 
-        normalRadioButton.setToggleGroup(group);
-        disturbRadioButton.setToggleGroup(group);
-        concentratedRadioButton.setToggleGroup(group);
-        holidayRadioButton.setToggleGroup(group);
+        normalRadioButton.setToggleGroup(toggleGroup);
+        disturbRadioButton.setToggleGroup(toggleGroup);
+        concentratedRadioButton.setToggleGroup(toggleGroup);
+        holidayRadioButton.setToggleGroup(toggleGroup);
     }
 
     public void setMainScreenController(MainScreenController mainScreenController){
@@ -67,10 +67,10 @@ public class ChangeModeScreenController {
         mode = mainScreenController.getMode();
 
         switch (mode) {
-            case NORMAL -> group.selectToggle(normalRadioButton);
-            case DISTURB -> group.selectToggle(disturbRadioButton);
-            case CONCENTRATED -> group.selectToggle(concentratedRadioButton);
-            case HOLIDAY -> group.selectToggle(holidayRadioButton);
+            case NORMAL -> toggleGroup.selectToggle(normalRadioButton);
+            case DISTURB -> toggleGroup.selectToggle(disturbRadioButton);
+            case CONCENTRATED -> toggleGroup.selectToggle(concentratedRadioButton);
+            case HOLIDAY -> toggleGroup.selectToggle(holidayRadioButton);
         }
     }
 
@@ -115,8 +115,6 @@ public class ChangeModeScreenController {
     @FXML
     public void concentratedSettings() throws IOException {
 
-        //TODO can't access windows behind this one?
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ConcentratedSettingsScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -155,7 +153,7 @@ public class ChangeModeScreenController {
     @FXML
     public void confirmChoice(Event event){
 
-        RadioButton selectedToggle = (RadioButton) group.getSelectedToggle();
+        RadioButton selectedToggle = (RadioButton) toggleGroup.getSelectedToggle();
 
         switch (selectedToggle.getText()) {
             case "Normal" -> mode = Mode.NORMAL;

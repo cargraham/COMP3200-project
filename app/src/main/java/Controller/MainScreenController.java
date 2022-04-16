@@ -6,6 +6,8 @@ import Model.Holiday;
 import Model.Mode;
 import com.microsoft.graph.models.*;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,7 +24,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.Modality;
@@ -33,7 +34,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -57,9 +57,6 @@ public class MainScreenController {
 
     @FXML
     public Label timeStampText;
-
-    @FXML
-    public Text bodyText;
 
     @FXML
     public TreeView<String> foldersList;
@@ -86,12 +83,15 @@ public class MainScreenController {
     public Button forwardButton;
 
     @FXML
+    public Button editDraftButton;
+
+    @FXML
     public Button changeModeButton;
 
-    public HashMap<VBox, Message> messageMap = new HashMap<>(); //TODO all could be private?
-    public HashMap<String, String> folderMap = new HashMap<>();
-    public Timer timer = new Timer();
-
+    private final HashMap<VBox, Message> messageMap = new HashMap<>();
+    private final ArrayList<Message> inboxMessageList = new ArrayList<>();
+    private final HashMap<String, String> folderMap = new HashMap<>(); //TODO don't use
+    private Timer timer = new Timer();
     private Mode mode = Mode.NORMAL; //TODO initialise through text file settings
     private Holiday holiday = Holiday.NONE;
     private Disturb disturb = Disturb.OFF;
@@ -102,6 +102,9 @@ public class MainScreenController {
     private final int notificationLength = 50;
     private ArrayList<String> senders = new ArrayList<>();
     private ArrayList<String> keywords = new ArrayList<>();
+    private final int noOfMessage = 30;
+    private final String inboxString = "inbox";
+    private String currentFolder = inboxString;
 
     /*
     * GETTERS AND SETTERS
@@ -154,28 +157,29 @@ public class MainScreenController {
         this.syncFrequency = syncFrequency;
     }
 
-    public void setSenders(ArrayList<String> senders) {
-        this.senders = senders;
-    }
-
     public ArrayList<String> getSenders() {
         return senders;
     }
 
-    public void setKeywords(ArrayList<String> keywords) {
-        this.keywords = keywords;
+    public void setSenders(ArrayList<String> senders) {
+        this.senders = senders;
     }
 
     public ArrayList<String> getKeywords() {
         return keywords;
     }
 
+    public void setKeywords(ArrayList<String> keywords) {
+        this.keywords = keywords;
+    }
+
+    //populates the listview and hashmap with message from the current folder
     public void listMessages(String folderName){
 
         messageListView.getItems().clear();
         messageMap.clear();
 
-        List<Message> messageList = Graph.getMailListFromFolder(folderName, 20);
+        List<Message> messageList = Graph.getMailListFromFolder(folderName, noOfMessage);
 
         for (Message message: messageList) {
 
@@ -216,22 +220,19 @@ public class MainScreenController {
         }
     }
 
-    private String recipientsString(List<Recipient> recipients){ //TODO replace with StringJoiner
+    //joins recipients together into a string for display purposes
+    private String recipientsString(List<Recipient> recipients){
 
-        String recipientsString = "";
+        StringJoiner recipientJoiner = new StringJoiner(";");
 
-        for (Recipient recipient : recipients) {
-            if (recipientsString.isEmpty()){
-                recipientsString += recipient.emailAddress.name;
-            }
-            else{
-                recipientsString += "; " + recipient.emailAddress.name;
-            }
+        for(Recipient recipient : recipients){
+            recipientJoiner.add(recipient.emailAddress.name);
         }
 
-        return recipientsString;
+        return recipientJoiner.toString();
     }
 
+    //shows a message on the right pane
     public void selectMessage(Message selectedMessage) {
 
         if(selectedMessage.sender != null){
@@ -266,14 +267,11 @@ public class MainScreenController {
                 attachmentsHbox.getChildren().add(attachmentButton);
 
                 if (attachment.oDataType.equals("#microsoft.graph.fileAttachment")){
-                    EventHandler<ActionEvent> event = event1 -> {
+
+                    attachmentButton.setOnAction(event1 -> {
 
                         FileAttachment attachment1 = Graph.getMessageFileAttachment(selectedMessage.id, attachment.id);
-
                         String home = System.getProperty("user.home");
-
-                        System.out.println("path separator: " + File.separator);
-
                         File file = new File(home + File.separator + "Downloads" + File.separator + attachment1.name);
 
                         try(FileOutputStream outputStream = new FileOutputStream(file)){
@@ -289,23 +287,22 @@ public class MainScreenController {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    };
-
-                    attachmentButton.setOnAction(event);
+                    });
                 }
             }
         }
 
         OffsetDateTime receivedDateTime = selectedMessage.receivedDateTime;
-
         timeStampText.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(receivedDateTime));
+        webView.getEngine().loadContent(selectedMessage.body.content); //TODO figure out how to display this properly
 
-        webView.getEngine().loadContent(selectedMessage.body.content);
-
-        //TODO figure out how to display this properly
+        try{
+            Graph.readMessage(selectedMessage);
+        }catch(Exception ignored){}
     }
 
-    @FXML
+    //changes message selection on listview click
+    /*@FXML
     public void handleListViewClick(MouseEvent event){
 
         VBox vbox = messageListView.getSelectionModel().getSelectedItem();
@@ -317,29 +314,51 @@ public class MainScreenController {
                 child.setStyle("-fx-font-weight: normal;");
             }
 
-            Graph.readMessage(selectedMessage); //TODO might need a try catch - socket timeout exception
+            try{
+                Graph.readMessage(selectedMessage);
+            }catch(Exception ignored){}
+
             selectMessage(selectedMessage);
         }
-    }
+    }*/
 
-    @FXML
+    //changes message selection on arrow key press
+    /*@FXML
     public void handleListViewKeyPress(KeyEvent event){
 
         if(event.getCode().isArrowKey()){
-            selectMessage(messageMap.get(messageListView.getSelectionModel().getSelectedItem()));
-        }
-    }
+            VBox vbox = messageListView.getSelectionModel().getSelectedItem();
 
+            if(vbox != null){
+                Message selectedMessage = messageMap.get(vbox);
+
+                for(Node child : vbox.getChildren()){
+                    child.setStyle("-fx-font-weight: normal;");
+                }
+
+                try{
+                    Graph.readMessage(selectedMessage);
+                }catch(Exception ignored){}
+
+                selectMessage(selectedMessage);
+            }
+        }
+    }*/
+
+    //changes folder selection on tree view click
     @FXML
     public void handleFoldersListClick() {
 
         //doesn't let you select parent nodes
         if(foldersList.getSelectionModel().getSelectedItem().isLeaf()){
-            listMessages(folderMap.get(foldersList.getSelectionModel().getSelectedItem().getValue()));
-            //TODO create local variable to keep track of current folder - lowercase and remove spaces
+            String selectedFolder = foldersList.getSelectionModel().getSelectedItem().getValue();
+            listMessages(folderMap.get(selectedFolder));
+            currentFolder = selectedFolder.toLowerCase(Locale.ROOT).replaceAll("\\s+", "");
+            selectFirstMessage();
         }
     }
 
+    //load all the folders into the tree view
     public void loadFolders(){
 
         List<MailFolder> folders = Graph.getMailFolders();
@@ -380,6 +399,7 @@ public class MainScreenController {
         foldersList.getSelectionModel().select(1);
     }
 
+    //logs the user in
     public void logIn(){
         // Load OAuth settings
         final Properties oAuthProperties = new Properties();
@@ -396,14 +416,14 @@ public class MainScreenController {
 
         // Initialize Graph with auth settings
         Graph.initializeGraphAuth(appId, appScopes);
-        //final String accessToken = Graph.getUserAccessToken();
+        /*//final String accessToken = Graph.getUserAccessToken();
 
         // Greet the user
-        User user = Graph.getUser();
-        System.out.println("Welcome " + user.displayName);
+        User user = Graph.getUser();*/
     }
 
-    public void sendNotification(String sender, String subject, String bodyPreview){
+    //sends a javafx notification for an email
+    public void sendEmailNotification(String sender, String subject, String bodyPreview){
 
         String ellipsis = "...";
 
@@ -423,9 +443,11 @@ public class MainScreenController {
                 .title(sender)
                 .text(subject + System.lineSeparator() + bodyPreview)
                 .hideAfter(new Duration(5000))
+                .darkStyle()
                 .show();
     }
 
+    //sends a javafx notification when a mode is chosen
     public void sendModeNotification(String mode, String sender, String subject, String bodyPreview){
 
         String ellipsis = "...";
@@ -450,37 +472,85 @@ public class MainScreenController {
                 .title(mode + System.lineSeparator() + sender)
                 .text(subject + System.lineSeparator() + bodyPreview)
                 .hideAfter(new Duration(5000))
+                .darkStyle()
                 .show();
     }
 
+    //FXML initialize method to initialize screen after FXML values are injected
     @FXML
-    public void initialize() throws ParseException {
+    public void initialize() {
         logIn();
         loadFolders();
         listMessages(folderMap.get("Inbox"));
         syncTimer();
+        selectFirstMessage();
+        initialiseInboxMap();
+        addListViewListener();
+    }
 
-        //first message is selected on load - TODO should probably have its own method
+    //add listener to list view for selection changes
+    public void addListViewListener(){
+        messageListView.getSelectionModel().selectedItemProperty()
+                .addListener((observable, oldValue, newValue) -> {
+
+                    try{
+
+                        Message selectedMessage = messageMap.get(newValue);
+
+                        if(selectedMessage.isDraft){
+                            editDraftButton.setDisable(false);
+                        }
+                        else{
+                            editDraftButton.setDisable(true);
+                        }
+
+                        if(!selectedMessage.isRead){
+                            for(Node child : newValue.getChildren()){
+                                child.setStyle("-fx-font-weight: normal;");
+                            }
+                        }
+
+                        selectMessage(selectedMessage);
+
+                    }catch(NullPointerException ignored){}
+                });
+    }
+
+    //initialises inbox message map
+    public void initialiseInboxMap(){
+
+        inboxMessageList.addAll(Graph.getMailListFromFolder(inboxString, noOfMessage));
+    }
+
+    //first message is selected
+    public void selectFirstMessage(){
+
         if(!messageListView.getItems().isEmpty()){
 
             messageListView.getSelectionModel().select(0);
-
             selectMessage(messageMap.get(messageListView.getSelectionModel().getSelectedItem()));
         }
     }
 
+    //launches new email screen when 'New Email' button clicked
     @FXML
-    public void launchNewEmailWindow() throws IOException {
+    public void newEmail() throws IOException {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/NewEmailScreen.fxml"));
+        Parent root = fxmlLoader.load();
         Stage stage = new Stage();
-        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+
+        NewEmailScreenController newEmailScreenController = fxmlLoader.getController();
+        newEmailScreenController.setStage(stage);
+
+        Scene scene = new Scene(root, 600, 400);
         scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("New Email");
         stage.setScene(scene);
         stage.show();
     }
 
+    //deletes selected message when 'Delete' button is clicked
     @FXML
     public void deleteMessage(){
 
@@ -492,8 +562,10 @@ public class MainScreenController {
 
         messageListView.getItems().remove(messageVbox);
         messageMap.remove(messageVbox);
+        inboxMessageList.remove(selectedMessage);
     }
 
+    //launches the reply screen when 'Reply' button is clicked
     @FXML
     public void replyToMessage() throws IOException {
 
@@ -501,13 +573,15 @@ public class MainScreenController {
         Parent root = fxmlLoader.load();
 
         ReplyEmailScreenController replyEmailScreenController = fxmlLoader.getController();
+
         Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
         Recipient recipient = selectedMessage.sender;
         String subject = selectedMessage.subject;
-
         replyEmailScreenController.initialiseReply(recipient, subject, selectedMessage.id);
 
         Stage stage = new Stage();
+        replyEmailScreenController.setStage(stage);
+
         Scene scene = new Scene(root, 600, 400);
         scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Reply to Email");
@@ -515,6 +589,7 @@ public class MainScreenController {
         stage.show();
     }
 
+    //launches reply all screen when 'Reply All' button is clicked
     @FXML
     public void replyAllToMessage() throws IOException {
 
@@ -530,6 +605,8 @@ public class MainScreenController {
         replyEmailScreenController.initialiseReply(recipients, subject, selectedMessage.id);
 
         Stage stage = new Stage();
+        replyEmailScreenController.setStage(stage);
+
         Scene scene = new Scene(root, 600, 400);
         scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Reply All to Email");
@@ -537,6 +614,7 @@ public class MainScreenController {
         stage.show();
     }
 
+    //launches forward screen when 'Forward' button is clicked
     @FXML
     public void forwardMessage() throws IOException {
 
@@ -545,10 +623,11 @@ public class MainScreenController {
 
         ForwardEmailScreenController forwardEmailScreenController = fxmlLoader.getController();
         Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
-
         forwardEmailScreenController.initialiseMessage(selectedMessage);
 
         Stage stage = new Stage();
+        forwardEmailScreenController.setStage(stage);
+
         Scene scene = new Scene(root, 600, 400);
         scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Forward Email");
@@ -556,6 +635,26 @@ public class MainScreenController {
         stage.show();
     }
 
+    //launches edit draft screen when 'Edit Draft' button is clicked
+    @FXML
+    public void editDraft() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/EditDraftScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        EditDraftScreenController editDraftScreenController = fxmlLoader.getController();
+        Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
+        editDraftScreenController.initialiseDraft(selectedMessage);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 600, 400);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setTitle("Edit Draft");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    //launches change mode screen when 'Change Mode' button is clicked
     @FXML
     public void changeMode() throws IOException {
 
@@ -575,11 +674,13 @@ public class MainScreenController {
         stage.show();
     }
 
+    //cancels timer so it can be reset with different syncFrequency
     public void cancelTimer(){
         timer.cancel();
         timer = new Timer();
     }
 
+    //syncs the timer with the given syncFrequency
     public void syncTimer(){ //TODO could be done in a different class/file?
 
         timer.schedule(new TimerTask() {
@@ -588,16 +689,16 @@ public class MainScreenController {
 
                 Platform.runLater(() -> {
 
-                    try{ //TODO if current folder is inbox - maybe a difference map for inbox? Could just be list of IDs?
+                    try{
 
                         System.out.println("MODE: " + mode);
 
-                        if(mode != Mode.DISTURB || (mode == Mode.DISTURB && disturb == Disturb.OFF)){
-                            List<Message> messages = Graph.getMailListFromFolder("inbox", messageMap.size()); //from graph
-                            List<Message> difference = new ArrayList<>(messageMap.values()); //from app - doesn't work if inbox isn't selected
+                        //if(mode != Mode.DISTURB || (mode == Mode.DISTURB && disturb == Disturb.OFF)){
+                            List<Message> messages = Graph.getMailListFromFolder(inboxString, messageMap.size()); //from graph
+                            //List<Message> difference = new ArrayList<>(messageMap.values()); //from app - doesn't work if inbox isn't selected
 
                             Map<String, Message> messageIDMap = messages.stream().collect(Collectors.toMap(message -> message.id, message -> message));
-                            Map<String, Message> differenceIDMap = difference.stream().collect(Collectors.toMap(message -> message.id, message -> message));
+                            Map<String, Message> differenceIDMap = inboxMessageList.stream().collect(Collectors.toMap(message -> message.id, message -> message));
 
                             for(String id : differenceIDMap.keySet()){
                                 messageIDMap.remove(id);
@@ -606,13 +707,16 @@ public class MainScreenController {
                             System.out.println("MESSAGE ID SIZE: " + messageIDMap.size());
 
                             if (messageIDMap.size() > 0){
+
+                                inboxMessageList.addAll(messageIDMap.values());
+
                                 if(mode == Mode.NORMAL){
                                     for(Message message : messageIDMap.values()){
 
                                         String sender = message.sender.emailAddress.name;
                                         String subject = message.subject;
                                         String bodyPreview = message.bodyPreview;
-                                        sendNotification(sender, subject, bodyPreview);
+                                        sendEmailNotification(sender, subject, bodyPreview);
                                     }
                                 }
                                 else if(mode == Mode.CONCENTRATED){
@@ -624,7 +728,7 @@ public class MainScreenController {
 
 
                                     if(notificationCount >= notificationThreshold){
-                                        sendNotification("Concentrated Mode", "You have " + notificationCount + " new emails in your Inbox", "");
+                                        sendEmailNotification("Concentrated Mode", "You have " + notificationCount + " new emails in your Inbox", "");
                                         notificationCount = 0;
                                     }
                                 }
@@ -682,17 +786,17 @@ public class MainScreenController {
                                                 senderHolidayNotification(sender, subject, bodyPreview);
                                             }
                                             else if(containsKeywords(message)){
-
+                                                keywordHolidayNotification(sender, subject, bodyPreview);
                                             }
                                             else if(isImportant(message)){
-
+                                                importantHolidayNotification(sender, subject, bodyPreview);
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                        else{
+                        //}
+                        //else{
 
                             Date now = new Date();
 
@@ -702,24 +806,29 @@ public class MainScreenController {
                                     disturb = Disturb.OFF;
                                 }
                             }
+                        //}
+
+                        if(currentFolder.equals(inboxString)){
+                            listMessages(inboxString);
+                            selectFirstMessage();
                         }
 
-                        listMessages("inbox");
-
                     } catch (Exception e){
-                        System.out.println(e);
+                        e.printStackTrace();
                     }
                 });
             }
         }, 0, syncFrequency);
     }
 
-    public boolean fromSpecifiedSender(Message message){
+    //returns true if sender of message is a specified sender
+    private boolean fromSpecifiedSender(Message message){
 
         return senders.contains(message.sender.emailAddress.address);
     }
 
-    public boolean containsKeywords(Message message){
+    //returns true if message contains specified keywords
+    private boolean containsKeywords(Message message){
 
         String lowercaseSubject = message.subject.toLowerCase();
         String lowercaseBody = message.body.content.toLowerCase(Locale.ROOT);
@@ -736,22 +845,26 @@ public class MainScreenController {
         return contains;
     }
 
-    public boolean isImportant(Message message){
+    //returns true is message is labelled 'Important'
+    private boolean isImportant(Message message){
 
         Importance importance = message.importance;
 
         return importance.equals(Importance.HIGH);
     }
 
-    public void senderHolidayNotification(String sender, String subject, String bodyPreview){
+    //sends a holiday notification from a specified sender
+    private void senderHolidayNotification(String sender, String subject, String bodyPreview){
         sendModeNotification("Holiday Mode - from a specified sender", sender, subject, bodyPreview);
     }
 
-    public void keywordHolidayNotification(String sender, String subject, String bodyPreview){
+    //sends a holiday notification that contains keywords
+    private void keywordHolidayNotification(String sender, String subject, String bodyPreview){
         sendModeNotification("Holiday Mode - contains keywords", sender, subject, bodyPreview);
     }
 
-    public void importantHolidayNotification(String sender, String subject, String bodyPreview){
+    //sends a holiday notification for an important email
+    private void importantHolidayNotification(String sender, String subject, String bodyPreview){
         sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
     }
 }

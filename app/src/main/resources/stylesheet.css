@@ -9,7 +9,6 @@
 .button {
     -fx-text-fill: #ffffff;
     -fx-background-color: #434B4C;
-    -fx-transition-duration: 1s;
     -fx-background-radius: 0;
     -fx-border-color: #A3D9FF;
     -fx-border-width: 0.5;
@@ -85,3 +84,17 @@
 .radio-button, .text, #text {
     -fx-text-fill: #ffffff;
 }
+
+/*
+.radio-button:selected > .radio > .dot {
+    -fx-background-color: #A3D9FF;
+    -fx-background-radius: 15px;
+    -fx-padding: 8px;
+}
+
+.radio-button > .radio{
+    -fx-background-color: #434B4C;
+    -fx-border-color: #A3D9FF;
+    -fx-border-radius: 15px;
+    -fx-padding: 3px;
+}*/

@@ -6,22 +6,15 @@ import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.logger.DefaultLogger;
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.*;
-import com.microsoft.graph.options.HeaderOption;
-import com.microsoft.graph.options.Option;
-import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.*;
-import com.microsoft.graph.serializer.OffsetDateTimeSerializer;
+import com.microsoft.graph.tasks.LargeFileUploadTask;
 import okhttp3.Request;
 
+import java.io.IOException;
 import java.net.URL;
-import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class Graph {
 
@@ -71,118 +64,6 @@ public class Graph {
                 .get();
 
         return me;
-    }
-
-    public static List<Event> getCalendarView( //TODO not used
-            ZonedDateTime viewStart, ZonedDateTime viewEnd, String timeZone) {
-        if (graphClient == null) throw new NullPointerException(
-                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
-
-        List<Option> options = new LinkedList<Option>();
-        options.add(new QueryOption("startDateTime", viewStart.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
-        options.add(new QueryOption("endDateTime", viewEnd.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
-        // Sort results by start time
-        options.add(new QueryOption("$orderby", "start/dateTime"));
-
-        // Start and end times adjusted to user's time zone
-        options.add(new HeaderOption("Prefer", "outlook.timezone=\"" + timeZone + "\""));
-
-        // GET /me/events
-        EventCollectionPage eventPage = graphClient
-                .me()
-                .calendarView()
-                .buildRequest(options)
-                .select("subject,organizer,start,end")
-                .top(25)
-                .get();
-
-        List<Event> allEvents = new LinkedList<Event>();
-
-        // Create a separate list of options for the paging requests
-        // paging request should not include the query parameters from the initial
-        // request, but should include the headers.
-        List<Option> pagingOptions = new LinkedList<Option>();
-        pagingOptions.add(new HeaderOption("Prefer", "outlook.timezone=\"" + timeZone + "\""));
-
-        while (eventPage != null) {
-            allEvents.addAll(eventPage.getCurrentPage());
-
-            EventCollectionRequestBuilder nextPage =
-                    eventPage.getNextPage();
-
-            if (nextPage == null) {
-                break;
-            } else {
-                eventPage = nextPage
-                        .buildRequest(pagingOptions)
-                        .get();
-            }
-        }
-
-        return allEvents;
-    }
-
-    public static void createEvent( //TODO not used
-            String timeZone,
-            String subject,
-            LocalDateTime start,
-            LocalDateTime end,
-            Set<String> attendees,
-            String body)
-    {
-        if (graphClient == null) throw new NullPointerException(
-                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
-
-        Event newEvent = new Event();
-
-        newEvent.subject = subject;
-
-        newEvent.start = new DateTimeTimeZone();
-        newEvent.start.dateTime = start.toString();
-        newEvent.start.timeZone = timeZone;
-
-        newEvent.end = new DateTimeTimeZone();
-        newEvent.end.dateTime = end.toString();
-        newEvent.end.timeZone = timeZone;
-
-        if (attendees != null && !attendees.isEmpty()) {
-            newEvent.attendees = new LinkedList<Attendee>();
-
-            attendees.forEach((email) -> {
-                Attendee attendee = new Attendee();
-                // Set each attendee as required
-                attendee.type = AttendeeType.REQUIRED;
-                attendee.emailAddress = new EmailAddress();
-                attendee.emailAddress.address = email;
-                newEvent.attendees.add(attendee);
-            });
-        }
-
-        if (body != null) {
-            newEvent.body = new ItemBody();
-            newEvent.body.content = body;
-            // Treat body as plain text
-            newEvent.body.contentType = BodyType.TEXT;
-        }
-
-        // POST /me/events
-        graphClient
-                .me()
-                .events()
-                .buildRequest()
-                .post(newEvent);
-    }
-
-    public static List<Message> getMailList(int noOfMessages){
-
-        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
-
-        MessageCollectionPage messagePage = graphClient.me().messages()
-                .buildRequest()
-                .top(noOfMessages)
-                .get();
-
-        return new ArrayList<Message>(messagePage.getCurrentPage());
     }
 
     public static List<Message> getMailListFromFolder(String folder, int noOfMessages){
@@ -253,8 +134,8 @@ public class Graph {
         message.sender = sender;
 
         ItemBody body = new ItemBody();
-        body.contentType = BodyType.TEXT;
-        body.content = bodyText;
+        body.contentType = BodyType.HTML;
+        body.content = newMessageHTMLParser(bodyText);
         message.body = body;
 
         LinkedList<Recipient> toRecipientsList = new LinkedList<>();
@@ -285,6 +166,25 @@ public class Graph {
         if (graphClient == null) throw new NullPointerException(
                 "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
 
+        message.isDraft = true;
+
+        graphClient.me().messages()
+                .buildRequest()
+                .post(message);
+    }
+
+    public static void saveDraftWithAttachment(Message message, LinkedList<Attachment> attachmentLinkedList){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        message.isDraft = true;
+
+        AttachmentCollectionResponse attachmentCollectionResponse = new AttachmentCollectionResponse();
+        attachmentCollectionResponse.value = attachmentLinkedList;
+        AttachmentCollectionPage attachmentCollectionPage = new AttachmentCollectionPage(attachmentCollectionResponse, null);
+        message.attachments = attachmentCollectionPage;
+
         graphClient.me().messages()
                 .buildRequest()
                 .post(message);
@@ -294,6 +194,25 @@ public class Graph {
 
         if (graphClient == null) throw new NullPointerException(
                 "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me()
+                .sendMail(UserSendMailParameterSet
+                        .newBuilder()
+                        .withMessage(message)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static void sendMessageWithAttachment(Message message, LinkedList<Attachment> attachmentLinkedList) throws IOException {
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        AttachmentCollectionResponse attachmentCollectionResponse = new AttachmentCollectionResponse();
+        attachmentCollectionResponse.value = attachmentLinkedList;
+        AttachmentCollectionPage attachmentCollectionPage = new AttachmentCollectionPage(attachmentCollectionResponse, null);
+        message.attachments = attachmentCollectionPage;
 
         graphClient.me()
                 .sendMail(UserSendMailParameterSet
@@ -343,6 +262,25 @@ public class Graph {
                 .post();
     }
 
+    public static void replyToMessageWithAttachment(String messageID, Message reply, LinkedList<Attachment> attachmentLinkedList){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        AttachmentCollectionResponse attachmentCollectionResponse = new AttachmentCollectionResponse();
+        attachmentCollectionResponse.value = attachmentLinkedList;
+        AttachmentCollectionPage attachmentCollectionPage = new AttachmentCollectionPage(attachmentCollectionResponse, null);
+        reply.attachments = attachmentCollectionPage;
+
+        graphClient.me().messages(messageID)
+                .reply(MessageReplyParameterSet
+                        .newBuilder()
+                        .withMessage(reply)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
     public static void replyAllToMessage(String messageID, Message reply){
 
         if (graphClient == null) throw new NullPointerException(
@@ -352,20 +290,6 @@ public class Graph {
                 .replyAll(MessageReplyAllParameterSet
                         .newBuilder()
                         .withMessage(reply)
-                        .build())
-                .buildRequest()
-                .post();
-    }
-
-    public static void forwardMessage(String messageID, List<String> toRecipients, Message message) {
-
-        if (graphClient == null) throw new NullPointerException(
-                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
-
-        graphClient.me().messages(messageID)
-                .forward(MessageForwardParameterSet
-                        .newBuilder()
-                        .withMessage(message)
                         .build())
                 .buildRequest()
                 .post();
@@ -383,14 +307,7 @@ public class Graph {
 
         ItemBody body = new ItemBody();
         body.contentType = messageToForward.body.contentType;
-
-        //if(body.contentType == BodyType.HTML) {
-            body.content = htmlParser(bodyText) + messageToForward.body.content;
-        /*}
-        else{
-            body.content = bodyText + messageToForward.body.content;
-        }*/
-
+        body.content = forwardingHTMLParser(bodyText) + messageToForward.body.content;
         message.body = body;
 
         LinkedList<Recipient> toRecipientsList = new LinkedList<>();
@@ -416,13 +333,51 @@ public class Graph {
         return message;
     }
 
-    public static String htmlParser(String body){
+    public static void forwardMessage(String messageID, Message message) {
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().messages(messageID)
+                .forward(MessageForwardParameterSet
+                        .newBuilder()
+                        .withMessage(message)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static void forwardMessageWithAttachment(String messageID, Message message, LinkedList<Attachment> attachmentLinkedList){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        AttachmentCollectionResponse attachmentCollectionResponse = new AttachmentCollectionResponse();
+        attachmentCollectionResponse.value = attachmentLinkedList;
+        AttachmentCollectionPage attachmentCollectionPage = new AttachmentCollectionPage(attachmentCollectionResponse, null);
+        message.attachments = attachmentCollectionPage;
+
+        graphClient.me().messages(messageID)
+                .forward(MessageForwardParameterSet
+                        .newBuilder()
+                        .withMessage(message)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static String forwardingHTMLParser(String body){
 
         String newBody = body.replaceAll("(\r\n|\r|\n)", "<br>");
 
-        System.out.println(newBody);
+        return "<html><head></head><body style=\"font-family:Helvetica Neue,Helvetica,Arial,sans-serif\">" + newBody + "<br><hr><br></body></html>";
+    }
 
-        return "<html><head></head><body>" + newBody + "<br><hr><br></body></html>";
+    public static String newMessageHTMLParser(String body){
+
+        String newBody = body.replaceAll("(\r\n|\r|\n)", "<br>");
+
+        return "<html><head></head><body style=\"font-family:Helvetica Neue,Helvetica,Arial,sans-serif\">" + newBody + "</body></html>";
     }
 
     public static void readMessage(Message message){
@@ -440,21 +395,5 @@ public class Graph {
                 .buildRequest()
                 .patch(newMessage);
 
-    }
-
-    public static void createSubscription() throws ParseException {
-
-        GraphServiceClient graphClient = GraphServiceClient.builder().authenticationProvider( authProvider ).buildClient();
-
-        Subscription subscription = new Subscription();
-        subscription.changeType = "created";
-        subscription.notificationUrl = "https://webhook.site/a9639b99-4933-4367-bab8-bca509f5b11d";
-        subscription.resource = "me/mailFolders('Inbox')/messages";
-        subscription.expirationDateTime = OffsetDateTimeSerializer.deserialize("2022-04-05T18:23:45.9356913Z");
-        subscription.clientState = "secretClientValue";
-
-        graphClient.subscriptions()
-                .buildRequest()
-                .post(subscription);
     }
 }

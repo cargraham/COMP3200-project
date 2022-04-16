@@ -18,8 +18,8 @@ public class ChangeSyncFrequencyScreenController {
     @FXML
     public Button cancelButton;
 
-    public MainScreenController mainScreenController;
-    public long syncFrequency = 0;
+    private MainScreenController mainScreenController;
+    private long syncFrequency = 60000;
 
     @FXML
     public void initialize(){

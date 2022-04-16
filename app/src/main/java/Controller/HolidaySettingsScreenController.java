@@ -35,13 +35,60 @@ public class HolidaySettingsScreenController {
     @FXML
     public Button cancelButton;
 
-    public Holiday holiday;
-    public MainScreenController mainScreenController;
-    public String sendersString;
-    public String keywordsString;
-    public ArrayList<String> sendersList;
-    public ArrayList<String> keywordsList;
+    private Holiday holiday;
+    private MainScreenController mainScreenController;
+    private String sendersString;
+    private String keywordsString;
+    private ArrayList<String> sendersList;
+    private ArrayList<String> keywordsList;
     private final String SEMI_COLON = "; ";
+
+    public void setMainScreenController(MainScreenController mainScreenController){
+
+        this.mainScreenController = mainScreenController;
+        holiday = mainScreenController.getHoliday();
+
+        switch (holiday) {
+            case SENDERS_AND_KEYWORDS_AND_IMPORTANT -> {
+                sendersRadioButton.setSelected(true);
+                keywordsRadioButton.setSelected(true);
+                importantRadioButton.setSelected(true);
+            }
+            case SENDERS_AND_IMPORTANT -> {
+                sendersRadioButton.setSelected(true);
+                importantRadioButton.setSelected(true);
+            }
+            case SENDERS_AND_KEYWORDS -> {
+                sendersRadioButton.setSelected(true);
+                keywordsRadioButton.setSelected(true);
+            }
+            case KEYWORDS_AND_IMPORTANT -> {
+                keywordsRadioButton.setSelected(true);
+                importantRadioButton.setSelected(true);
+            }
+            case SENDERS -> sendersRadioButton.setSelected(true);
+            case KEYWORDS -> keywordsRadioButton.setSelected(true);
+            case IMPORTANT -> importantRadioButton.setSelected(true);
+        }
+
+        StringJoiner senderStringJoiner = new StringJoiner(SEMI_COLON);
+        sendersList = mainScreenController.getSenders();
+        for(String sender : sendersList){
+            senderStringJoiner.add(sender);
+        }
+
+        sendersString = senderStringJoiner.toString();
+        sendersTextField.setText(sendersString);
+
+        StringJoiner keywordsStringJoiner = new StringJoiner(SEMI_COLON);
+        keywordsList = mainScreenController.getKeywords();
+        for(String keywords : keywordsList){
+            keywordsStringJoiner.add(keywords);
+        }
+
+        keywordsString = keywordsStringJoiner.toString();
+        keywordsTextField.setText(keywordsString);
+    }
 
     @FXML
     public void confirmChoice(Event event){
@@ -107,52 +154,5 @@ public class HolidaySettingsScreenController {
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
-    }
-
-    public void setMainScreenController(MainScreenController mainScreenController){
-
-        this.mainScreenController = mainScreenController;
-        holiday = mainScreenController.getHoliday();
-
-        switch (holiday) {
-            case SENDERS_AND_KEYWORDS_AND_IMPORTANT -> {
-                sendersRadioButton.setSelected(true);
-                keywordsRadioButton.setSelected(true);
-                importantRadioButton.setSelected(true);
-            }
-            case SENDERS_AND_IMPORTANT -> {
-                sendersRadioButton.setSelected(true);
-                importantRadioButton.setSelected(true);
-            }
-            case SENDERS_AND_KEYWORDS -> {
-                sendersRadioButton.setSelected(true);
-                keywordsRadioButton.setSelected(true);
-            }
-            case KEYWORDS_AND_IMPORTANT -> {
-                keywordsRadioButton.setSelected(true);
-                importantRadioButton.setSelected(true);
-            }
-            case SENDERS -> sendersRadioButton.setSelected(true);
-            case KEYWORDS -> keywordsRadioButton.setSelected(true);
-            case IMPORTANT -> importantRadioButton.setSelected(true);
-        }
-
-        StringJoiner senderStringJoiner = new StringJoiner(SEMI_COLON);
-        sendersList = mainScreenController.getSenders();
-        for(String sender : sendersList){
-            senderStringJoiner.add(sender);
-        }
-
-        sendersString = senderStringJoiner.toString();
-        sendersTextField.setText(sendersString);
-
-        StringJoiner keywordsStringJoiner = new StringJoiner(SEMI_COLON);
-        keywordsList = mainScreenController.getKeywords();
-        for(String keywords : keywordsList){
-            keywordsStringJoiner.add(keywords);
-        }
-
-        keywordsString = keywordsStringJoiner.toString();
-        keywordsTextField.setText(keywordsString);
     }
 }
