@@ -28,6 +28,8 @@ public class ChangeSyncFrequencyScreenController {
         comboBox.getItems().add("10 Minutes");
         comboBox.getItems().add("30 Minutes");
         comboBox.getItems().add("60 Minutes");
+
+        comboBox.getSelectionModel().selectFirst();
     }
 
     public void setMainScreenController(MainScreenController mainScreenController){

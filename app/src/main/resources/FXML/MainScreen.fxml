@@ -20,7 +20,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainScreenController">
    <children>
       <MenuBar>
         <menus>
@@ -75,6 +75,21 @@
                                  </padding>
                               </Button>
                               <Button fx:id="editDraftButton" mnemonicParsing="false" onAction="#editDraft" prefHeight="80.0" prefWidth="65.0" text="Edit Draft" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="newFolderButton" mnemonicParsing="false" onAction="#newFolder" prefHeight="80.0" prefWidth="65.0" text="Add New Folder" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="deleteFolderButton" mnemonicParsing="false" onAction="#deleteFolder" prefHeight="80.0" prefWidth="65.0" text="Delete Folder" textAlignment="CENTER" wrapText="true">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="moveMessageButton" mnemonicParsing="false" onAction="#moveMessage" prefHeight="80.0" prefWidth="65.0" text="Move Message" textAlignment="CENTER" wrapText="true">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>

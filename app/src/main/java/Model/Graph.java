@@ -382,6 +382,9 @@ public class Graph {
 
     public static void readMessage(Message message){
 
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
         Message newMessage = new Message();
         newMessage.subject = message.subject;
         ItemBody body = new ItemBody();
@@ -395,5 +398,42 @@ public class Graph {
                 .buildRequest()
                 .patch(newMessage);
 
+    }
+
+    public static void newFolder(String name){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        MailFolder mailFolder = new MailFolder();
+        mailFolder.displayName = name;
+
+        graphClient.me().mailFolders()
+                .buildRequest()
+                .post(mailFolder);
+    }
+
+    public static void moveMessage(String messageID, String folderID){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().messages(messageID)
+                .move(MessageMoveParameterSet
+                        .newBuilder()
+                        .withDestinationId(folderID)
+                        .build())
+                .buildRequest()
+                .post();
+    }
+
+    public static void deleteFolder(String folderID){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().mailFolders(folderID)
+                .buildRequest()
+                .delete();
     }
 }

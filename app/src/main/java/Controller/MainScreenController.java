@@ -86,11 +86,20 @@ public class MainScreenController {
     public Button editDraftButton;
 
     @FXML
+    public Button newFolderButton;
+
+    @FXML
+    public Button deleteFolderButton;
+
+    @FXML
+    public Button moveMessageButton;
+
+    @FXML
     public Button changeModeButton;
 
     private final HashMap<VBox, Message> messageMap = new HashMap<>();
     private final ArrayList<Message> inboxMessageList = new ArrayList<>();
-    private final HashMap<String, String> folderMap = new HashMap<>(); //TODO don't use
+    private final HashMap<String, String> folderMap = new HashMap<>();
     private Timer timer = new Timer();
     private Mode mode = Mode.NORMAL; //TODO initialise through text file settings
     private Holiday holiday = Holiday.NONE;
@@ -105,10 +114,15 @@ public class MainScreenController {
     private final int noOfMessage = 30;
     private final String inboxString = "inbox";
     private String currentFolder = inboxString;
+    private ArrayList<String> faveNames = new ArrayList<>();
 
     /*
     * GETTERS AND SETTERS
     * */
+    public HashMap<String, String> getFolderMap() {
+        return folderMap;
+    }
+
     public int getNotificationThreshold() {
         return notificationThreshold;
     }
@@ -171,6 +185,10 @@ public class MainScreenController {
 
     public void setKeywords(ArrayList<String> keywords) {
         this.keywords = keywords;
+    }
+
+    public String getCurrentFolder() {
+        return currentFolder;
     }
 
     //populates the listview and hashmap with message from the current folder
@@ -358,18 +376,24 @@ public class MainScreenController {
         }
     }
 
-    //load all the folders into the tree view
-    public void loadFolders(){
-
-        List<MailFolder> folders = Graph.getMailFolders();
-
-        ArrayList<String> faveNames = new ArrayList<>(); //TODO this probably shouldn't hardcoded
+    //populates arraylist with non-deletable folders
+    public void populateFaveFolders(){
         faveNames.add("Inbox");
         faveNames.add("Sent Items");
         faveNames.add("Drafts");
         faveNames.add("Outbox");
         faveNames.add("Deleted Items");
         faveNames.add("Junk Email");
+        faveNames.add("Conversation History");
+        faveNames.add("Archive");
+    }
+
+    //load all the folders into the tree view
+    public void loadFolders(){
+
+        folderMap.clear();
+
+        List<MailFolder> folders = Graph.getMailFolders();
 
         TreeItem<String> rootItem = new TreeItem<>();
         TreeItem<String> faveRootItem = new TreeItem<>("Favourites");
@@ -480,6 +504,7 @@ public class MainScreenController {
     @FXML
     public void initialize() {
         logIn();
+        populateFaveFolders();
         loadFolders();
         listMessages(folderMap.get("Inbox"));
         syncTimer();
@@ -496,6 +521,13 @@ public class MainScreenController {
                     try{
 
                         Message selectedMessage = messageMap.get(newValue);
+
+                        if(selectedMessage != null && !selectedMessage.isDraft){
+                            moveMessageButton.setDisable(false);
+                        }
+                        else{
+                            moveMessageButton.setDisable(true);
+                        }
 
                         if(selectedMessage.isDraft){
                             editDraftButton.setDisable(false);
@@ -650,6 +682,78 @@ public class MainScreenController {
         Scene scene = new Scene(root, 600, 400);
         scene.getStylesheets().add("/stylesheet.css");
         stage.setTitle("Edit Draft");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    //launches new folder screen when 'Add New Folder' button is clicked
+    @FXML
+    public void newFolder() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/NewFolderScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        NewFolderScreenController newFolderScreenController = fxmlLoader.getController();
+        newFolderScreenController.setMainScreenController(this);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 300, 200);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setTitle("New Folder");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    //launches delete folder screen when 'Delete Folder' button is clicked
+    @FXML
+    public void deleteFolder() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/DeleteFolderScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        DeleteFolderScreenController deleteFolderScreenController = fxmlLoader.getController();
+        String currentFolder = foldersList.getSelectionModel().getSelectedItem().getValue();
+        String currentFolderID = folderMap.get(currentFolder);
+
+        boolean deletable;
+        if(faveNames.contains(currentFolder)){
+            deletable = false;
+        }
+        else{
+            deletable = true;
+        }
+
+        deleteFolderScreenController.initialiseDelete(this, currentFolder, currentFolderID, deletable);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 300, 200);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setTitle("Delete Folder");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    //launches move message screen when 'Move Message' button is clicked
+    @FXML
+    public void moveMessage() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/MoveMessageScreen.fxml"));
+        Parent root = fxmlLoader.load();
+
+        MoveMessageScreenController moveMessageScreenController = fxmlLoader.getController();
+        Message selectedMessage = messageMap.get(messageListView.getSelectionModel().getSelectedItem());
+        moveMessageScreenController.initialiseMoveMessage(this, selectedMessage.id);
+
+        Stage stage = new Stage();
+        Scene scene = new Scene(root, 300, 200);
+        scene.getStylesheets().add("/stylesheet.css");
+        stage.setTitle("Move Message");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
