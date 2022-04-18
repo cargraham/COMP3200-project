@@ -6,7 +6,7 @@
     -fx-faint-focus-color: transparent;
 }
 
-.button {
+.button, .toggle-button {
     -fx-text-fill: #ffffff;
     -fx-background-color: #434B4C;
     -fx-background-radius: 0;
@@ -28,12 +28,17 @@
     -fx-background-color: #434B4C;
 }
 
-.button:hover, .menu:hover, .menu-item:hover {
+.button:hover, .menu:hover, .menu-item:hover, .toggle-button:hover {
     -fx-background-color: #A3D9FF;
 }
 
 .button:pressed {
     -fx-background-color: #D6EEFF;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #D6EEFF;
+    -fx-text-fill: #434B4C;
 }
 
 .tab:selected, .tab:focused {
@@ -98,3 +103,8 @@
     -fx-border-radius: 15px;
     -fx-padding: 3px;
 }*/
+
+.importance {
+    -fx-text-fill: #ff3639;
+    -fx-font-size: 25px;
+}

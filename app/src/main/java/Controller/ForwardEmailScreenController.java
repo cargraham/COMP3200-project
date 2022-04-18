@@ -1,10 +1,7 @@
 package Controller;
 
 import Model.Graph;
-import com.microsoft.graph.models.Attachment;
-import com.microsoft.graph.models.FileAttachment;
-import com.microsoft.graph.models.Message;
-import com.microsoft.graph.models.Recipient;
+import com.microsoft.graph.models.*;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -12,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -52,6 +50,9 @@ public class ForwardEmailScreenController {
     public Button draftButton;
 
     @FXML
+    public ToggleButton importantToggle;
+
+    @FXML
     public Button sendButton;
 
     private final String SEMI_COLON = "; ";
@@ -90,6 +91,10 @@ public class ForwardEmailScreenController {
         }
 
         Message newMessage = Graph.createForwardMessage(subject, body, toRecipients, ccRecipients, message);
+
+        if(importantToggle.isSelected()){
+            newMessage.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.saveDraft(newMessage);
@@ -151,6 +156,10 @@ public class ForwardEmailScreenController {
         }
 
         Message newMessage = Graph.createForwardMessage(subject, body, toRecipients, ccRecipients, message);
+
+        if(importantToggle.isSelected()){
+            newMessage.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.forwardMessage(messageID, newMessage);

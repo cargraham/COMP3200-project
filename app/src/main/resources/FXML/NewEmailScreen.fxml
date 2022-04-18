@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -45,8 +46,9 @@
                <children>
                   <HBox spacing="10.0">
                      <children>
-                        <Button fx:id="draftButton" mnemonicParsing="false" onAction="#saveDraftMessage" prefHeight="90.0" prefWidth="60.0" text="Save as Draft" textAlignment="CENTER" wrapText="true" />
                         <Button fx:id="attachFileButton" mnemonicParsing="false" onAction="#attachFile" prefHeight="90.0" prefWidth="60.0" text="Attach File" textAlignment="CENTER" wrapText="true" />
+                        <ToggleButton fx:id="importantToggle" mnemonicParsing="false" prefHeight="90.0" prefWidth="60.0" text="!" />
+                        <Button fx:id="draftButton" mnemonicParsing="false" onAction="#saveDraftMessage" prefHeight="90.0" prefWidth="60.0" text="Save as Draft" textAlignment="CENTER" wrapText="true" />
                         <Button fx:id="sendButton" mnemonicParsing="false" onAction="#sendMessage" prefHeight="90.0" prefWidth="60.0" text="Send" />
                      </children>
                   </HBox>

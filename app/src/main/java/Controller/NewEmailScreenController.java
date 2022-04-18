@@ -3,6 +3,7 @@ package Controller;
 import Model.Graph;
 import com.microsoft.graph.models.Attachment;
 import com.microsoft.graph.models.FileAttachment;
+import com.microsoft.graph.models.Importance;
 import com.microsoft.graph.models.Message;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -44,10 +46,13 @@ public class NewEmailScreenController {
     public TextArea bodyTextArea;
 
     @FXML
-    public Button draftButton;
+    public ToggleButton importantToggle;
 
     @FXML
     public Button attachFileButton;
+
+    @FXML
+    public Button draftButton;
 
     @FXML
     public Button sendButton;
@@ -77,6 +82,10 @@ public class NewEmailScreenController {
         }
 
         Message message = Graph.createMessage(subject, body, toRecipients, ccRecipients);
+
+        if(importantToggle.isSelected()){
+            message.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.saveDraft(message);
@@ -138,6 +147,10 @@ public class NewEmailScreenController {
         }
 
         Message message = Graph.createMessage(subject, body, toRecipients, ccRecipients);
+
+        if(importantToggle.isSelected()){
+            message.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.sendMessage(message);

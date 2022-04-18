@@ -7,7 +7,6 @@ import com.microsoft.graph.logger.DefaultLogger;
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.*;
 import com.microsoft.graph.requests.*;
-import com.microsoft.graph.tasks.LargeFileUploadTask;
 import okhttp3.Request;
 
 import java.io.IOException;
@@ -135,7 +134,7 @@ public class Graph {
 
         ItemBody body = new ItemBody();
         body.contentType = BodyType.HTML;
-        body.content = newMessageHTMLParser(bodyText);
+        body.content = newMessageHTMLConverter(bodyText);
         message.body = body;
 
         LinkedList<Recipient> toRecipientsList = new LinkedList<>();
@@ -307,7 +306,7 @@ public class Graph {
 
         ItemBody body = new ItemBody();
         body.contentType = messageToForward.body.contentType;
-        body.content = forwardingHTMLParser(bodyText) + messageToForward.body.content;
+        body.content = forwardingHTMLConverter(bodyText) + messageToForward.body.content;
         message.body = body;
 
         LinkedList<Recipient> toRecipientsList = new LinkedList<>();
@@ -366,14 +365,14 @@ public class Graph {
                 .post();
     }
 
-    public static String forwardingHTMLParser(String body){
+    public static String forwardingHTMLConverter(String body){
 
         String newBody = body.replaceAll("(\r\n|\r|\n)", "<br>");
 
         return "<html><head></head><body style=\"font-family:Helvetica Neue,Helvetica,Arial,sans-serif\">" + newBody + "<br><hr><br></body></html>";
     }
 
-    public static String newMessageHTMLParser(String body){
+    public static String newMessageHTMLConverter(String body){
 
         String newBody = body.replaceAll("(\r\n|\r|\n)", "<br>");
 

@@ -1,10 +1,7 @@
 package Controller;
 
 import Model.Graph;
-import com.microsoft.graph.models.Attachment;
-import com.microsoft.graph.models.FileAttachment;
-import com.microsoft.graph.models.Message;
-import com.microsoft.graph.models.Recipient;
+import com.microsoft.graph.models.*;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -12,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -47,6 +45,9 @@ public class ReplyEmailScreenController {
 
     @FXML
     public Button draftButton;
+
+    @FXML
+    public ToggleButton importantToggle;
 
     @FXML
     public Button sendButton;
@@ -113,6 +114,10 @@ public class ReplyEmailScreenController {
 
         Message message = Graph.createMessage(subject, body, toRecipients, ccRecipients);
 
+        if(importantToggle.isSelected()){
+            message.importance = Importance.HIGH;
+        }
+
         if(attachments.isEmpty()){
             Graph.saveDraft(message);
         }
@@ -173,6 +178,10 @@ public class ReplyEmailScreenController {
         }
 
         Message message = Graph.createMessage(subject, body, toRecipients, ccRecipients);
+
+        if(importantToggle.isSelected()){
+            message.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.replyToMessage(messageID, message);

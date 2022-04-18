@@ -13,6 +13,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
@@ -141,7 +142,18 @@
                         <Label fx:id="senderText" />
                         <Label fx:id="recipientText" />
                         <Label fx:id="subjectText" />
-                        <Label fx:id="timeStampText" />
+                        <BorderPane>
+                           <left>
+                              <Label fx:id="timeStampText" BorderPane.alignment="CENTER" />
+                           </left>
+                           <right>
+                              <Label fx:id="importantText" styleClass="importance" stylesheets="@../stylesheet.css" textFill="#ff3639" BorderPane.alignment="CENTER">
+                                 <BorderPane.margin>
+                                    <Insets right="5.0" />
+                                 </BorderPane.margin>
+                              </Label>
+                           </right>
+                        </BorderPane>
                         <HBox fx:id="attachmentsHbox" prefWidth="200.0" />
                         <Separator prefWidth="200.0" />
                         <WebView fx:id="webView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />

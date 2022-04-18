@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
@@ -57,6 +58,9 @@ public class MainScreenController {
 
     @FXML
     public Label timeStampText;
+
+    @FXML
+    public Label importantText;
 
     @FXML
     public TreeView<String> foldersList;
@@ -214,11 +218,25 @@ public class MainScreenController {
             Label bodyPreview = new Label(message.bodyPreview.split(System.lineSeparator())[0]);
             Label timestamp = new Label(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(message.receivedDateTime));
 
-            HBox hBox = new HBox(timestamp);
-            hBox.setMaxWidth(300);
-            hBox.setAlignment(Pos.TOP_RIGHT);
+            Label importantLabel = new Label();
+            importantLabel.setStyle("-fx-text-fill: #ff3639; -fx-font-size: 18px;");
+            importantLabel.setPadding(new Insets(0, 5, 0, 0));
 
-            VBox vBox = new VBox(5, hBox, sender, subject, bodyPreview);
+            if(message.importance == Importance.HIGH){
+                importantLabel.setText("!");
+            }
+
+            bodyPreview.setMaxWidth(280);
+
+            BorderPane borderPane = new BorderPane();
+            borderPane.setLeft(bodyPreview);
+            borderPane.setRight(importantLabel);
+
+            HBox timestampHBox = new HBox(timestamp);
+            timestampHBox.setMaxWidth(300);
+            timestampHBox.setAlignment(Pos.TOP_RIGHT);
+
+            VBox vBox = new VBox(5, timestampHBox, sender, subject, borderPane);
             vBox.setPadding(new Insets(10, 5, 10 , 5));
             vBox.setMaxWidth(300);
             vBox.setMinWidth(300);
@@ -272,6 +290,13 @@ public class MainScreenController {
         }
         else{
             subjectText.setText("Subject: ");
+        }
+
+        if(selectedMessage.importance == Importance.HIGH){
+            importantText.setText("!");
+        }
+        else{
+            importantText.setText("");
         }
 
         webView.getEngine().loadContent("");

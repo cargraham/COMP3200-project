@@ -1,10 +1,7 @@
 package Controller;
 
 import Model.Graph;
-import com.microsoft.graph.models.Attachment;
-import com.microsoft.graph.models.FileAttachment;
-import com.microsoft.graph.models.Message;
-import com.microsoft.graph.models.Recipient;
+import com.microsoft.graph.models.*;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -12,9 +9,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Whitelist;
 
 import java.awt.*;
 import java.io.File;
@@ -53,6 +54,9 @@ public class EditDraftScreenController {
     public Button attachFileButton;
 
     @FXML
+    public ToggleButton importantToggle;
+
+    @FXML
     public Button sendButton;
 
     private final String SEMI_COLON = "; ";
@@ -79,7 +83,16 @@ public class EditDraftScreenController {
         ccTextField.setText(buildRecipientsString(ccRecipients));
         subjectTextField.setText(subject);
 
-        String parsedBody = body.replaceAll("<[^>]*>", "");
+        Document document = Jsoup.parse(body);
+        Document.OutputSettings outputSettings = new Document.OutputSettings();
+        outputSettings.prettyPrint(false);
+        document.outputSettings(outputSettings);
+        document.select("br").before("\\n");
+        document.select("p").before("\\n");
+
+        String originalNewLines = document.html().replaceAll("\\\\n", "\n");
+        String parsedBody = Jsoup.clean(originalNewLines, "", Whitelist.none(), outputSettings);
+
         bodyTextArea.setText(parsedBody);
 
         if(message.hasAttachments){
@@ -118,6 +131,10 @@ public class EditDraftScreenController {
                 }
             }
         }
+
+        if(message.importance == Importance.HIGH){
+            importantToggle.setSelected(true);
+        }
     }
 
     public String buildRecipientsString(ArrayList<Recipient> recipients){
@@ -152,6 +169,10 @@ public class EditDraftScreenController {
         }
 
         Message message = Graph.createMessage(subject, body, toRecipients, ccRecipients);
+
+        if(importantToggle.isSelected()){
+            message.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.saveDraft(message);
@@ -213,6 +234,10 @@ public class EditDraftScreenController {
         }
 
         Message message = Graph.createMessage(subject, body, toRecipients, ccRecipients);
+
+        if(importantToggle.isSelected()){
+            message.importance = Importance.HIGH;
+        }
 
         if(attachments.isEmpty()){
             Graph.sendMessage(message);
