@@ -17,6 +17,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.*;
@@ -464,12 +465,27 @@ public class MainScreenController {
                 .asList(oAuthProperties.getProperty("app.scopes").split(","));
 
         // Initialize Graph with auth settings
-        Graph.initializeGraphAuth(appId, appScopes);
+        Graph.initializeGraphAuth(appId, appScopes, this);
         /*//final String accessToken = Graph.getUserAccessToken();
 
         // Greet the user
         User user = Graph.getUser();*/
     }
+
+    /*public static void loginPopUp(String message){
+
+        System.out.println("in the login popup method");
+
+        Platform.startup(() -> {
+
+            System.out.println("in the platform run later");
+
+            Alert alert = new Alert(Alert.AlertType.NONE);
+            alert.setTitle("Log In");
+            alert.setContentText(message);
+            alert.show();
+        });
+    }*/
 
     //sends a javafx notification for an email
     public void sendEmailNotification(String sender, String subject, String bodyPreview){

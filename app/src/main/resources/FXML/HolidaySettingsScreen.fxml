@@ -24,7 +24,7 @@
                            <font>
                               <Font size="13.0" />
                            </font></RadioButton>
-                        <Text fill="#696868" strokeType="OUTSIDE" strokeWidth="0.0" text="Please enter the email addresses you would like to allow, separated by a semicolon ';'">
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Please enter the email addresses you would like to allow, separated by a semicolon ';'">
                            <font>
                               <Font size="10.0" />
                            </font>
@@ -45,7 +45,7 @@
                            <font>
                               <Font size="13.0" />
                            </font></RadioButton>
-                        <Text fill="#696868" strokeType="OUTSIDE" strokeWidth="0.0" text="Please enter the keywords you would like to allow, separated by a semicolon ';'">
+                        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Please enter the keywords you would like to allow, separated by a semicolon ';'">
                            <font>
                               <Font size="10.0" />
                            </font>

@@ -1,5 +1,6 @@
 package Model;
 
+import Controller.MainScreenController;
 import com.azure.identity.DeviceCodeCredential;
 import com.azure.identity.DeviceCodeCredentialBuilder;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
@@ -19,13 +20,17 @@ public class Graph {
 
     private static GraphServiceClient<Request> graphClient = null;
     private static TokenCredentialAuthProvider authProvider = null;
+    private static String challengeString;
 
-    public static void initializeGraphAuth(String applicationId, List<String> scopes) {
+    public static void initializeGraphAuth(String applicationId, List<String> scopes, MainScreenController mainScreenController) {
         // Create the auth provider
         final DeviceCodeCredential credential = new DeviceCodeCredentialBuilder()
                 .clientId(applicationId)
                 .tenantId("common")
-                .challengeConsumer(challenge -> System.out.println(challenge.getMessage())) //TODO display this in fx dialog
+                .challengeConsumer(challenge -> {
+                    System.out.println(challenge.getMessage());
+                    //TODO display this in fx dialog
+                })
                 .build();
 
         authProvider = new TokenCredentialAuthProvider(scopes, credential);

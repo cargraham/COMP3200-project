@@ -93,9 +93,15 @@ public class HolidaySettingsScreenController {
     @FXML
     public void confirmChoice(Event event){
 
+        System.out.println("sendersString: " + sendersString);
+        System.out.println("sendersTextField: " + sendersTextField.getText());
+        System.out.println("sendersList: " + sendersList);
+
         if(!sendersString.equals(sendersTextField.getText())){
 
             sendersString = sendersTextField.getText().toLowerCase();
+
+            sendersList.clear();
 
             for(String sender : sendersString.split(";")){
                 sendersList.add(sender.trim());

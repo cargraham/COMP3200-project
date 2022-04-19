@@ -6,6 +6,12 @@
     -fx-faint-focus-color: transparent;
 }
 
+.separator > .line {
+    /*-fx-background-color: #A3D9FF;*/
+    -fx-border-color: #A3D9FF;
+    -fx-border-width: 0.5;
+}
+
 .button, .toggle-button {
     -fx-text-fill: #ffffff;
     -fx-background-color: #434B4C;
