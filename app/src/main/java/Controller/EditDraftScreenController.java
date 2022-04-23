@@ -176,9 +176,11 @@ public class EditDraftScreenController {
 
         if(attachments.isEmpty()){
             Graph.saveDraft(message);
+            Graph.deleteDraft(messageID);
         }
         else{
             Graph.saveDraftWithAttachment(message, attachments);
+            Graph.deleteDraft(messageID);
         }
 
         Node source = (Node) event.getSource();
@@ -241,9 +243,12 @@ public class EditDraftScreenController {
 
         if(attachments.isEmpty()){
             Graph.sendMessage(message);
+            Graph.deleteDraft(messageID);
+
         }
         else{
             Graph.sendMessageWithAttachment(message, attachments);
+            Graph.deleteDraft(messageID);
         }
 
         Node source = (Node) event.getSource();

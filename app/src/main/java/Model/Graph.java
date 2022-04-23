@@ -105,17 +105,6 @@ public class Graph {
         return new ArrayList<>(attachmentPage.getCurrentPage());
     }
 
-    public static Attachment getMessageAttachment(String messageID, String attachmentID){
-
-        if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
-
-        Attachment attachment = graphClient.me().messages(messageID).attachments(attachmentID)
-                .buildRequest()
-                .get();
-
-        return attachment;
-    }
-
     public static FileAttachment getMessageFileAttachment(String messageID, String attachmentID){
 
         if (graphClient == null) throw new NullPointerException("Graph client has not been initialized. Call initializeGraphAuth before calling this method");
@@ -192,6 +181,16 @@ public class Graph {
         graphClient.me().messages()
                 .buildRequest()
                 .post(message);
+    }
+
+    public static void deleteDraft(String messageID){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        graphClient.me().messages(messageID)
+                .buildRequest()
+                .delete();
     }
 
     public static void sendMessage(Message message){
@@ -439,5 +438,15 @@ public class Graph {
         graphClient.me().mailFolders(folderID)
                 .buildRequest()
                 .delete();
+    }
+
+    public static Message getMessage(String messageID){
+
+        if (graphClient == null) throw new NullPointerException(
+                "Graph client has not been initialized. Call initializeGraphAuth before calling this method");
+
+        return graphClient.me().messages(messageID)
+                .buildRequest()
+                .get();
     }
 }

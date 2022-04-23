@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Graph;
+import com.microsoft.graph.models.Message;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -44,11 +45,19 @@ public class MoveMessageScreenController {
 
         String selectedFolder = folderComboBox.getSelectionModel().getSelectedItem();
         String folderID = folderMap.get(selectedFolder);
+        String currentFolder = mainScreenController.getCurrentFolder();
+        Message selectedMessage = Graph.getMessage(messageID);
 
         Graph.moveMessage(messageID, folderID);
 
-        if(mainScreenController.getCurrentFolder() == selectedFolder){
-            mainScreenController.listMessages(selectedFolder);
+        mainScreenController.listMessages(currentFolder);
+
+        if(currentFolder.equalsIgnoreCase("inbox")){
+            mainScreenController.removeFromInboxList(selectedMessage);
+        }
+
+        if(selectedFolder.equalsIgnoreCase("inbox")){
+            mainScreenController.addToInboxList(selectedMessage);
         }
 
         Node source = (Node) event.getSource();

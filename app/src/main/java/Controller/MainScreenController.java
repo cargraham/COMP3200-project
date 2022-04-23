@@ -119,7 +119,7 @@ public class MainScreenController {
     private final int noOfMessage = 30;
     private final String inboxString = "inbox";
     private String currentFolder = inboxString;
-    private ArrayList<String> faveNames = new ArrayList<>();
+    private final ArrayList<String> faveNames = new ArrayList<>();
 
     /*
     * GETTERS AND SETTERS
@@ -345,50 +345,6 @@ public class MainScreenController {
         }catch(Exception ignored){}
     }
 
-    //changes message selection on listview click
-    /*@FXML
-    public void handleListViewClick(MouseEvent event){
-
-        VBox vbox = messageListView.getSelectionModel().getSelectedItem();
-
-        if(vbox != null){
-            Message selectedMessage = messageMap.get(vbox);
-
-            for(Node child : vbox.getChildren()){
-                child.setStyle("-fx-font-weight: normal;");
-            }
-
-            try{
-                Graph.readMessage(selectedMessage);
-            }catch(Exception ignored){}
-
-            selectMessage(selectedMessage);
-        }
-    }*/
-
-    //changes message selection on arrow key press
-    /*@FXML
-    public void handleListViewKeyPress(KeyEvent event){
-
-        if(event.getCode().isArrowKey()){
-            VBox vbox = messageListView.getSelectionModel().getSelectedItem();
-
-            if(vbox != null){
-                Message selectedMessage = messageMap.get(vbox);
-
-                for(Node child : vbox.getChildren()){
-                    child.setStyle("-fx-font-weight: normal;");
-                }
-
-                try{
-                    Graph.readMessage(selectedMessage);
-                }catch(Exception ignored){}
-
-                selectMessage(selectedMessage);
-            }
-        }
-    }*/
-
     //changes folder selection on tree view click
     @FXML
     public void handleFoldersListClick() {
@@ -471,21 +427,6 @@ public class MainScreenController {
         // Greet the user
         User user = Graph.getUser();*/
     }
-
-    /*public static void loginPopUp(String message){
-
-        System.out.println("in the login popup method");
-
-        Platform.startup(() -> {
-
-            System.out.println("in the platform run later");
-
-            Alert alert = new Alert(Alert.AlertType.NONE);
-            alert.setTitle("Log In");
-            alert.setContentText(message);
-            alert.show();
-        });
-    }*/
 
     //sends a javafx notification for an email
     public void sendEmailNotification(String sender, String subject, String bodyPreview){
@@ -1011,5 +952,13 @@ public class MainScreenController {
     //sends a holiday notification for an important email
     private void importantHolidayNotification(String sender, String subject, String bodyPreview){
         sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
+    }
+
+    public void addToInboxList(Message message){
+        inboxMessageList.add(message);
+    }
+
+    public void removeFromInboxList(Message message){
+        inboxMessageList.remove(message);
     }
 }
