@@ -22,8 +22,8 @@ public class DeleteFolderScreenController {
     private MainScreenController mainScreenController;
     private String folderID;
 
+    //sets the main screen controller and imports the current settings
     public void initialiseDelete(MainScreenController mainScreenController, String folderName, String folderID, boolean deletable){
-
         this.mainScreenController = mainScreenController;
         this.folderID = folderID;
 
@@ -36,9 +36,9 @@ public class DeleteFolderScreenController {
         }
     }
 
+    //sends selected choice to main screen controller on confirm button click
     @FXML
     public void confirmChoice(Event event){
-
         Graph.deleteFolder(folderID);
         mainScreenController.loadFolders();
 
@@ -47,9 +47,9 @@ public class DeleteFolderScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save setting choices on cancel button click
     @FXML
     public void cancel(Event event){
-
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();

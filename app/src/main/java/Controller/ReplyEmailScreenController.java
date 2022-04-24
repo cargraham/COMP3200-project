@@ -59,11 +59,13 @@ public class ReplyEmailScreenController {
     private Stage thisStage;
     private final LinkedList<Attachment> attachments = new LinkedList<>();
 
+    //sets the 'From' field to the user's name after FXML values have been injected
     @FXML
     public void initialize(){
         fromTextField.setText(Graph.getUser().userPrincipalName);
     }
 
+    //initialises the UI with message details when there's one recipient
     public void initialiseReply(Recipient recipient, String subject, String messageID){
         this.recipients = new ArrayList<>();
         this.recipients.add(recipient);
@@ -73,6 +75,7 @@ public class ReplyEmailScreenController {
         subjectTextField.setText("RE: "  + this.subject);
     }
 
+    //initialises the UI with message details when there's more than one recipient
     public void initialiseReply(ArrayList<Recipient> recipients, String subject, String messageID){
         this.subject = subject;
         this.messageID = messageID;
@@ -81,8 +84,8 @@ public class ReplyEmailScreenController {
         subjectTextField.setText("RE: "  + this.subject);
     }
 
+    //builds a string of recipients joined by a semicolon
     public String buildRecipientsString(ArrayList<Recipient> recipients){
-
         StringJoiner recipientJoiner = new StringJoiner(SEMI_COLON);
 
         for(Recipient recipient : recipients){
@@ -97,9 +100,9 @@ public class ReplyEmailScreenController {
         return recipientJoiner.toString();
     }
 
+    //saves a draft message and closes window on button click
     @FXML
     public void saveDraftMessage(Event event){
-
         String subject = subjectTextField.getText();
         String body = bodyTextArea.getText();
         ArrayList<String> toRecipients = new ArrayList<>();
@@ -130,9 +133,9 @@ public class ReplyEmailScreenController {
         stage.close();
     }
 
+    //launches file chooser to allow user to choose attachment
     @FXML
     public void attachFile() throws IOException {
-
         FileChooser fileChooser = new FileChooser();
         File attachment = fileChooser.showOpenDialog(thisStage);
 
@@ -162,9 +165,9 @@ public class ReplyEmailScreenController {
         });
     }
 
+    //sends message on button click
     @FXML
     public void sendMessage(Event event){
-
         String subject = subjectTextField.getText();
         String body = bodyTextArea.getText();
         ArrayList<String> toRecipients = new ArrayList<>();
@@ -190,12 +193,12 @@ public class ReplyEmailScreenController {
             Graph.replyToMessageWithAttachment(messageID, message, attachments);
         }
 
-
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
     }
 
+    //sets the stage for use with file chooser
     public void setStage(Stage thisStage){
         this.thisStage = thisStage;
     }

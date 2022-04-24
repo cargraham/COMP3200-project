@@ -21,6 +21,7 @@ public class ChangeSyncFrequencyScreenController {
     private MainScreenController mainScreenController;
     private long syncFrequency = 60000;
 
+    //initialises the UI after FXML values have been injected
     @FXML
     public void initialize(){
         comboBox.getItems().add("1 Minute");
@@ -32,14 +33,15 @@ public class ChangeSyncFrequencyScreenController {
         comboBox.getSelectionModel().selectFirst();
     }
 
+    //sets the main screen controller and imports the current settings
     public void setMainScreenController(MainScreenController mainScreenController){
         this.mainScreenController = mainScreenController;
         syncFrequency = mainScreenController.getSyncFrequency();
     }
 
+    //sends selected choice to main screen controller on confirm button click
     @FXML
     public void confirmFrequencyChoice(Event event){
-
         String minutes = comboBox.getValue();
 
         switch (minutes) {
@@ -59,6 +61,7 @@ public class ChangeSyncFrequencyScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save setting choices on cancel button click
     @FXML
     public void cancel(Event event){
         Node source = (Node) event.getSource();

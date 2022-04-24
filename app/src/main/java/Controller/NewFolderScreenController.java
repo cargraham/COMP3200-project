@@ -22,13 +22,14 @@ public class NewFolderScreenController {
 
     private MainScreenController mainScreenController;
 
+    //sets main screen controller
     public void setMainScreenController(MainScreenController mainScreenController){
         this.mainScreenController = mainScreenController;
     }
 
+    //creates new folder on confirm button click
     @FXML
     public void confirmChoice(Event event){
-
         String folderName = folderNameTextField.getText();
         Graph.newFolder(folderName);
 
@@ -39,9 +40,9 @@ public class NewFolderScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save choices on cancel button click
     @FXML
     public void cancel(Event event){
-
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();

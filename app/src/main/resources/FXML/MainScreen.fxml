@@ -219,7 +219,7 @@
                               </Label>
                            </right>
                         </BorderPane>
-                        <HBox fx:id="attachmentsHbox" prefWidth="200.0" />
+                        <HBox fx:id="attachmentsHBox" prefWidth="200.0" />
                         <Separator prefWidth="200.0" />
                         <WebView fx:id="webView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                      </children>

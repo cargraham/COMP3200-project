@@ -61,14 +61,15 @@ public class NewEmailScreenController {
     private Stage thisStage;
     private final LinkedList<Attachment> attachments = new LinkedList<>();
 
+    //sets the 'From' field to the user's name after FXML values have been injected
     @FXML
     public void initialize(){
         fromTextField.setText(Graph.getUser().userPrincipalName);
     }
 
+    //saves a draft message and closes window on button click
     @FXML
     public void saveDraftMessage(Event event){
-
         String subject = subjectTextField.getText();
         String body = bodyTextArea.getText();
         ArrayList<String> toRecipients = new ArrayList<>();
@@ -99,9 +100,9 @@ public class NewEmailScreenController {
         stage.close();
     }
 
+    //launches file chooser to allow user to choose attachment
     @FXML
     public void attachFile() throws IOException {
-
         FileChooser fileChooser = new FileChooser();
         File attachment = fileChooser.showOpenDialog(thisStage);
 
@@ -131,9 +132,9 @@ public class NewEmailScreenController {
         });
     }
 
+    //sends message on button click
     @FXML
     public void sendMessage(Event event) throws IOException {
-
         String subject = subjectTextField.getText();
         String body = bodyTextArea.getText();
         ArrayList<String> toRecipients = new ArrayList<>();
@@ -164,6 +165,7 @@ public class NewEmailScreenController {
         stage.close();
     }
 
+    //sets the stage for use with file chooser
     public void setStage(Stage thisStage){
         this.thisStage = thisStage;
     }

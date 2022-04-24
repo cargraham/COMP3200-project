@@ -57,9 +57,9 @@ public class DisturbSettingsScreenController {
     private Date disturbTime;
     private final ToggleGroup toggleGroup = new ToggleGroup();
 
+    //initialises the UI after FXML values have been injected
     @FXML
     public void initialize(){
-
         radioButton1Hour.setToggleGroup(toggleGroup);
         radioButton8Hours.setToggleGroup(toggleGroup);
         radioButton24Hours.setToggleGroup(toggleGroup);
@@ -70,8 +70,8 @@ public class DisturbSettingsScreenController {
         minutePicker.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0, 1));
     }
 
+    //sets the main screen controller and imports the current settings
     public void setMainScreenController(MainScreenController mainScreenController){
-
         this.mainScreenController = mainScreenController;
         disturb = mainScreenController.getDisturb();
         disturbTime = mainScreenController.getDisturbTime();
@@ -104,9 +104,9 @@ public class DisturbSettingsScreenController {
         }
     }
 
+    //disables/enables other choices when the on/off button is toggled
     @FXML
     public void toggleMode(){
-
         if(toggleButton.isSelected()){
             radioButton1Hour.setDisable(true);
             radioButton8Hours.setDisable(true);
@@ -133,9 +133,9 @@ public class DisturbSettingsScreenController {
         }
     }
 
+    //sends selected choice to main screen controller on confirm button click
     @FXML
     public void confirmChoice(Event event){
-
         RadioButton selectedToggle = (RadioButton) toggleGroup.getSelectedToggle();
 
         if(toggleButton.isSelected()){
@@ -185,9 +185,9 @@ public class DisturbSettingsScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save setting choices on cancel button click
     @FXML
     public void cancel(Event event){
-
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();

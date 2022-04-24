@@ -22,15 +22,16 @@ public class ConcentratedSettingsScreenController {
     private MainScreenController mainScreenController;
     private int notificationThreshold;
 
+    //sets the main screen controller and imports the current settings
     public void setMainScreenController(MainScreenController mainScreenController){
         this.mainScreenController = mainScreenController;
         notificationThreshold = mainScreenController.getNotificationThreshold();
         spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, notificationThreshold, 1));
     }
 
+    //sends selected choice to main screen controller on confirm button click
     @FXML
     public void confirmChoice(Event event){
-
         notificationThreshold = spinner.getValue();
         mainScreenController.setNotificationThreshold(notificationThreshold);
 
@@ -39,6 +40,7 @@ public class ConcentratedSettingsScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save setting choices on cancel button click
     @FXML
     public void cancel(Event event){
         Node source = (Node) event.getSource();

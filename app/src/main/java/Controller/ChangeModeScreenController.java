@@ -52,17 +52,17 @@ public class ChangeModeScreenController {
     private Mode mode;
     private final ToggleGroup toggleGroup = new ToggleGroup();
 
+    //initialises the UI after FXML values have been injected
     @FXML
     public void initialize(){
-
         normalRadioButton.setToggleGroup(toggleGroup);
         disturbRadioButton.setToggleGroup(toggleGroup);
         concentratedRadioButton.setToggleGroup(toggleGroup);
         holidayRadioButton.setToggleGroup(toggleGroup);
     }
 
+    //sets the main screen controller and imports the current settings
     public void setMainScreenController(MainScreenController mainScreenController){
-
         this.mainScreenController = mainScreenController;
         mode = mainScreenController.getMode();
 
@@ -74,9 +74,9 @@ public class ChangeModeScreenController {
         }
     }
 
+    //launches the change sync frequency stage on button click
     @FXML
     public void showChangeSyncFrequency() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeSyncFrequencyScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -93,9 +93,9 @@ public class ChangeModeScreenController {
         stage.show();
     }
 
+    //launches do not disturb settings on button click
     @FXML
     public void disturbSettings() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/DisturbSettingsScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -112,9 +112,9 @@ public class ChangeModeScreenController {
         stage.show();
     }
 
+    //launches concentrated settings on button click
     @FXML
     public void concentratedSettings() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ConcentratedSettingsScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -131,9 +131,9 @@ public class ChangeModeScreenController {
         stage.show();
     }
 
+    //launches holiday settings on button click
     @FXML
     public void holidaySettings() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/HolidaySettingsScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -150,9 +150,9 @@ public class ChangeModeScreenController {
         stage.show();
     }
 
+    //sends selected choice to main screen controller on confirm button click
     @FXML
     public void confirmChoice(Event event){
-
         RadioButton selectedToggle = (RadioButton) toggleGroup.getSelectedToggle();
 
         switch (selectedToggle.getText()) {
@@ -173,9 +173,9 @@ public class ChangeModeScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save setting choices on cancel button click
     @FXML
     public void cancel(Event event){
-
         Node source = (Node) event.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();

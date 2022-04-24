@@ -43,8 +43,8 @@ public class HolidaySettingsScreenController {
     private ArrayList<String> keywordsList;
     private final String SEMI_COLON = "; ";
 
+    //sets the main screen controller and imports the current settings
     public void setMainScreenController(MainScreenController mainScreenController){
-
         this.mainScreenController = mainScreenController;
         holiday = mainScreenController.getHoliday();
 
@@ -90,9 +90,9 @@ public class HolidaySettingsScreenController {
         keywordsTextField.setText(keywordsString);
     }
 
+    //sends selected choice to main screen controller on confirm button click
     @FXML
     public void confirmChoice(Event event){
-
         System.out.println("sendersString: " + sendersString);
         System.out.println("sendersTextField: " + sendersTextField.getText());
         System.out.println("sendersList: " + sendersList);
@@ -100,7 +100,6 @@ public class HolidaySettingsScreenController {
         if(!sendersString.equals(sendersTextField.getText())){
 
             sendersString = sendersTextField.getText().toLowerCase();
-
             sendersList.clear();
 
             for(String sender : sendersString.split(";")){
@@ -120,7 +119,6 @@ public class HolidaySettingsScreenController {
 
             mainScreenController.setKeywords(keywordsList);
         }
-
 
         if(sendersRadioButton.isSelected() && keywordsRadioButton.isSelected() && importantRadioButton.isSelected()){
             holiday = Holiday.SENDERS_AND_KEYWORDS_AND_IMPORTANT;
@@ -154,6 +152,7 @@ public class HolidaySettingsScreenController {
         stage.close();
     }
 
+    //closes the stage and doesn't save setting choices on cancel button click
     @FXML
     public void cancel(Event event){
 

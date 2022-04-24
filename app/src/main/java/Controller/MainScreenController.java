@@ -6,10 +6,6 @@ import Model.Holiday;
 import Model.Mode;
 import com.microsoft.graph.models.*;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -17,12 +13,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -70,7 +63,7 @@ public class MainScreenController {
     public WebView webView;
 
     @FXML
-    public HBox attachmentsHbox;
+    public HBox attachmentsHBox;
 
     @FXML
     public Button newEmailButton;
@@ -106,7 +99,7 @@ public class MainScreenController {
     private final ArrayList<Message> inboxMessageList = new ArrayList<>();
     private final HashMap<String, String> folderMap = new HashMap<>();
     private Timer timer = new Timer();
-    private Mode mode = Mode.NORMAL; //TODO initialise through text file settings
+    private Mode mode = Mode.NORMAL;
     private Holiday holiday = Holiday.NONE;
     private Disturb disturb = Disturb.OFF;
     private Date disturbTime;
@@ -198,7 +191,6 @@ public class MainScreenController {
 
     //populates the listview and hashmap with message from the current folder
     public void listMessages(String folderName){
-
         messageListView.getItems().clear();
         messageMap.clear();
 
@@ -249,17 +241,13 @@ public class MainScreenController {
                 }
             }
 
-            //TODO add listener to split pane?
-
             messageMap.put(vBox, message);
-
             messageListView.getItems().add(vBox);
         }
     }
 
-    //joins recipients together into a string for display purposes
+    //builds a string of recipients joined by a semicolon
     private String recipientsString(List<Recipient> recipients){
-
         StringJoiner recipientJoiner = new StringJoiner(";");
 
         for(Recipient recipient : recipients){
@@ -271,7 +259,6 @@ public class MainScreenController {
 
     //shows a message on the right pane
     public void selectMessage(Message selectedMessage) {
-
         if(selectedMessage.sender != null){
             senderText.setText("From: " + selectedMessage.sender.emailAddress.name);
         }
@@ -301,14 +288,14 @@ public class MainScreenController {
         }
 
         webView.getEngine().loadContent("");
-        attachmentsHbox.getChildren().clear();
+        attachmentsHBox.getChildren().clear();
 
         if(selectedMessage.hasAttachments){
 
             for(Attachment attachment : Graph.getMessageAttachmentList(selectedMessage.id)){
 
                 Button attachmentButton = new Button(attachment.name);
-                attachmentsHbox.getChildren().add(attachmentButton);
+                attachmentsHBox.getChildren().add(attachmentButton);
 
                 if (attachment.oDataType.equals("#microsoft.graph.fileAttachment")){
 
@@ -348,7 +335,6 @@ public class MainScreenController {
     //changes folder selection on tree view click
     @FXML
     public void handleFoldersListClick() {
-
         //doesn't let you select parent nodes
         if(foldersList.getSelectionModel().getSelectedItem().isLeaf()){
             String selectedFolder = foldersList.getSelectionModel().getSelectedItem().getValue();
@@ -372,11 +358,9 @@ public class MainScreenController {
 
     //load all the folders into the tree view
     public void loadFolders(){
-
         folderMap.clear();
 
         List<MailFolder> folders = Graph.getMailFolders();
-
         TreeItem<String> rootItem = new TreeItem<>();
         TreeItem<String> faveRootItem = new TreeItem<>("Favourites");
         TreeItem<String> otherRootItem = new TreeItem<>("Other Folders");
@@ -430,7 +414,6 @@ public class MainScreenController {
 
     //sends a javafx notification for an email
     public void sendEmailNotification(String sender, String subject, String bodyPreview){
-
         String ellipsis = "...";
 
         if(sender.length() > notificationLength){
@@ -455,7 +438,6 @@ public class MainScreenController {
 
     //sends a javafx notification when a mode is chosen
     public void sendModeNotification(String mode, String sender, String subject, String bodyPreview){
-
         String ellipsis = "...";
 
         if(mode.length() > notificationLength){
@@ -532,13 +514,11 @@ public class MainScreenController {
 
     //initialises inbox message map
     public void initialiseInboxMap(){
-
         inboxMessageList.addAll(Graph.getMailListFromFolder(inboxString, noOfMessage));
     }
 
     //first message is selected
     public void selectFirstMessage(){
-
         if(!messageListView.getItems().isEmpty()){
 
             messageListView.getSelectionModel().select(0);
@@ -549,7 +529,6 @@ public class MainScreenController {
     //launches new email screen when 'New Email' button clicked
     @FXML
     public void newEmail() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/NewEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
         Stage stage = new Stage();
@@ -567,7 +546,6 @@ public class MainScreenController {
     //deletes selected message when 'Delete' button is clicked
     @FXML
     public void deleteMessage(){
-
         VBox messageVbox = messageListView.getSelectionModel().getSelectedItem();
         Message selectedMessage = messageMap.get(messageVbox);
         String currentFolderName = foldersList.getSelectionModel().getSelectedItem().getValue();
@@ -582,7 +560,6 @@ public class MainScreenController {
     //launches the reply screen when 'Reply' button is clicked
     @FXML
     public void replyToMessage() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ReplyEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -606,7 +583,6 @@ public class MainScreenController {
     //launches reply all screen when 'Reply All' button is clicked
     @FXML
     public void replyAllToMessage() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ReplyEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -631,7 +607,6 @@ public class MainScreenController {
     //launches forward screen when 'Forward' button is clicked
     @FXML
     public void forwardMessage() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ForwardEmailScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -652,7 +627,6 @@ public class MainScreenController {
     //launches edit draft screen when 'Edit Draft' button is clicked
     @FXML
     public void editDraft() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/EditDraftScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -671,7 +645,6 @@ public class MainScreenController {
     //launches new folder screen when 'Add New Folder' button is clicked
     @FXML
     public void newFolder() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/NewFolderScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -691,7 +664,6 @@ public class MainScreenController {
     //launches delete folder screen when 'Delete Folder' button is clicked
     @FXML
     public void deleteFolder() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/DeleteFolderScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -699,13 +671,7 @@ public class MainScreenController {
         String currentFolder = foldersList.getSelectionModel().getSelectedItem().getValue();
         String currentFolderID = folderMap.get(currentFolder);
 
-        boolean deletable;
-        if(faveNames.contains(currentFolder)){
-            deletable = false;
-        }
-        else{
-            deletable = true;
-        }
+        boolean deletable = !faveNames.contains(currentFolder);
 
         deleteFolderScreenController.initialiseDelete(this, currentFolder, currentFolderID, deletable);
 
@@ -722,7 +688,6 @@ public class MainScreenController {
     //launches move message screen when 'Move Message' button is clicked
     @FXML
     public void moveMessage() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/MoveMessageScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -743,7 +708,6 @@ public class MainScreenController {
     //launches change mode screen when 'Change Mode' button is clicked
     @FXML
     public void changeMode() throws IOException {
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/FXML/ChangeModeScreen.fxml"));
         Parent root = fxmlLoader.load();
 
@@ -768,7 +732,6 @@ public class MainScreenController {
 
     //syncs the timer with the given syncFrequency
     public void syncTimer(){ //TODO could be done in a different class/file?
-
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -909,13 +872,11 @@ public class MainScreenController {
 
     //returns true if sender of message is a specified sender
     private boolean fromSpecifiedSender(Message message){
-
         return senders.contains(message.sender.emailAddress.address);
     }
 
     //returns true if message contains specified keywords
     private boolean containsKeywords(Message message){
-
         String lowercaseSubject = message.subject.toLowerCase();
         String lowercaseBody = message.body.content.toLowerCase(Locale.ROOT);
 
@@ -933,9 +894,7 @@ public class MainScreenController {
 
     //returns true is message is labelled 'Important'
     private boolean isImportant(Message message){
-
         Importance importance = message.importance;
-
         return importance.equals(Importance.HIGH);
     }
 
@@ -954,10 +913,12 @@ public class MainScreenController {
         sendModeNotification("Holiday Mode - high importance", sender, subject, bodyPreview);
     }
 
+    //adds a given message to the list of messages in inbox
     public void addToInboxList(Message message){
         inboxMessageList.add(message);
     }
 
+    //removes a given message to the list of message in inbox
     public void removeFromInboxList(Message message){
         inboxMessageList.remove(message);
     }
