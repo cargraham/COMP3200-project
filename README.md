@@ -1,0 +1,6 @@
+# COMP3200 Individual Project
+Third year individual project submitted for the award of MEng Computer Science. Email has existed for the last 30 years with little change. It has fallen behind other communication methods such as team communication software like Microsoft Teams or Slack. Users often experience “email overload”, where they feel overwhelmed at the quantity of emails they receive. This research project investigates why “email overload” occurs, how it affects users and potential solutions.
+
+The research identified a number of issues, including the need for more automation in the organisation of inboxes, the desire to place the email client into a ‘mode’ to suit the users’ needs at that time and the need for fine-tuned control over their notifications to prevent distraction. It was discovered that many large email client providers such as Microsoft have been working to develop better automatic organisation of email inboxes; for example Outlook has introduced “Focused Inbox”. It was therefore decided that since this concept is already under development, it would not be included in this project.
+
+It was found that the concept of ‘modes’ and finely tuned notification control were the least explored and therefore an email client with ‘modes’ to allow the user more control over their notifications was developed as a proof of concept.
